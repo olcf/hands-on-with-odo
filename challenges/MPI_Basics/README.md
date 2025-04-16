@@ -396,7 +396,7 @@ The function arguments are:
 
 Here is its use.
 
-```bash
+```c
 #include “stdio.h”
 #include “mpi.h”
 
