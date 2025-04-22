@@ -1,6 +1,6 @@
 # OpenMP Basics
 
-OpenMP is programming model that allows you to write parallel code for multi-core, shared-memory processors. Your laptop/desktop likely has a multi-core processor (e.g., 4-core). This is also true of each individual compute node on Frontier - each has 64 physical CPU cores that have access to 512 GB of DDR4 memory. By shared-memory, we simply mean that all the CPU cores have access to the same memory (DRAM). 
+OpenMP is programming model that allows you to write parallel code for multi-core, shared-memory processors. Your laptop/desktop likely has a multi-core processor (e.g., 4-core). This is also true of each individual compute node on Odo (and Frontier) - each has 64 physical CPU cores that have access to 512 GB of DDR4 memory. By shared-memory, we simply mean that all the CPU cores have access to the same memory (DRAM). 
 
 In this challenge, we will explore the very basics of the [OpenMP Application Program Interface (OpenMP API)](https://www.openmp.org/specifications/), which consists of a collection of compiler directives, library routines, and environment variables. In the examples below, we will insert compiler directives into the code to tell the compiler how the program should be executed in parallel, and we will also use a couple of API functions and environment variables along the way.
 
@@ -52,7 +52,7 @@ virtual_core  = sched_getcpu();       // Find the virtual core the OpenMP thread
 
 `omp_get_num_threads()` and `omp_get_thread_num()` are two of the OpenMP API functions. They are used to determine the total number of OpenMP threads spawned inside the parallel region and a specific OpenMP thread's ID, respectively. In order to use these API calls, you need to include the `#include <omp.h>` header file. `sched_getcpu()` returns the ID of the virtual CPU core the OpenMP thread runs on - but this is **NOT** part of OpenMP.
 
-> CLARIFICATION: Each Frontier node contains 64 physical CPU cores, and each physical CPU core has 2 virtual cores for a total of 128 total virtual cores per node. Everywhere else in the challenges, these virtual cores are referred to as hardware threads, but they will be referred to as virtual CPU cores here to avoid confusion with the use of the word threads in the context of OpenMP. 
+> CLARIFICATION: Each Odo (and Frontier) node contains 64 physical CPU cores, and each physical CPU core has 2 virtual cores for a total of 128 total virtual cores per node. Everywhere else in the challenges, these virtual cores are referred to as hardware threads, but they will be referred to as virtual CPU cores here to avoid confusion with the use of the word threads in the context of OpenMP. 
 
 Ok, great! But what about the rest of that OpenMP directive? Let's take a look at each one of the clauses individually:
 
@@ -198,7 +198,7 @@ int main()
 }
 ```
 
-This code should be simple enough to understand from the in-line comments (allocate memory for vectors/arrays, intialize values, perform element-wise vector addition, check results). 
+This code should be simple enough to understand from the in-line comments (allocate memory for vectors/arrays, initialize values, perform element-wise vector addition, check results). 
 
 So how would we go about parallelizing the "element-wise vector addition" loop with OpenMP? The first thing you might think of is to add a `#pragma omp parallel` region around the loop, with appropriate privacy clauses (as we did in the hello world example above):
 
