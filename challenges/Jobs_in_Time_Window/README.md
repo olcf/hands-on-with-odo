@@ -13,7 +13,7 @@ We won't be submitting any new jobs here, but rather looking at others that have
 (See the `sacct` manual page by running `man` `sacct` for a full list of command options.)
 
 ## Let's try to answer...
-1. How many jobs were completed on Odo between 00:00 (midnight) on June 1, 2024 and 23:59 on June 15, 2024?
+1. How many jobs were completed on Odo between 00:00 (midnight) on February 1, 2025 and 23:59 on February 15, 2025?
 
 2. How many unique users did the jobs from question 1 belong to?
 
