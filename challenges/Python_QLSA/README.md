@@ -9,12 +9,28 @@ Here we provide a sample implementation of a QLSA, the [Harrow–Hassidim–Lloy
 
 An application to fluid dynamics is also provided. The fluid dynamics use case follows the work of [Bharadwaj & Srinivasan (2020)](https://www.sto.nato.int/publications/STO%20Educational%20Notes/STO-EN-AVT-377/EN-AVT-377-01.pdf) and [Gopalakrishnan Meena et al. (2024)](https://doi.org/10.1063/5.0231929). 
 
-## Significance of the HHL Algorithm
+Table of Contents:
+
+* [Significance of the HHL Algorithm](#sig)
+* [Quantum Algorithms Primer](#primer)
+	* [Quantum Phase Estimation (QPE) Steps](#qpe)
+	* [Walkthrough of the HHL algorithm](#hhl)
+	* [Workflow of our code](#workflow)
+	* [Implications of quantum algorithms](#impl)
+* [Setting Up Our Environment](#setup)
+* [Overview of How to Run](#overview)
+	* [Obtaining your IQM Key](#keys)
+	* [(Optional) Testing the Code ](#testing)
+     * [Running the QLSA Code](#qlsa)
+* [Challenges](#chall)
+* [References](#ref)
+
+## 1. <a name="sig"></a>Significance of the HHL Algorithm
 The HHL algorithm represents a monumental breakthrough in quantum computing, allowing for the efficient solution of linear systems of equations, a ubiquitous subtask that underlies numerous scientific and engineering applications. Traditional algorithms struggle with large-scale data sets, often resulting in extreme computational costs (O(N<sup>m</sup>) for solving N equations and m&ge;1). In contrast, the HHL algorithm harnesses the power of quantum mechanics to deliver an exponential (O(log N)) speedup, enabling faster computations that can solve complex problems in fields such as optimization, machine learning, and fluid dynamics!
 
 Understanding the HHL algorithm not only showcases the unique advantages of quantum computing but also opens the door to innovative applications that were previously unimaginable in classical computing. As we work through this challenge, we will explore the foundational principles and mathematical theory behind subroutines in the HHL algorithm. For specifics on how quantum computing works, please see our [`Python_QML_Basics`](../Python_QML_Basics) challenge.
 
-## Quantum Algorithms Primer
+## 2. <a name="primer"></a>Quantum Algorithms Primer
 
 Before we jump into the coding section, let's discuss the differences between classical and quantum algorithms. In fact, one common misconception is that quantum computers will outright replace classical computers. The truth is actually much more nuanced! Quantum algorithms are not designed to replace traditional computing algorithms; instead, they excel at solving specific types of problems that classical computers struggle with. 
 
@@ -31,7 +47,7 @@ One way of leveraging quantum mechanics for computing is by using one of the mos
 
 > **Please note that our intention is not to scare you away with terminology. If you find any terms in the following explanation confusing (don't worry, you're not alone), please reach out if any topics are not clear!**
 
-### Quantum Phase Estimation (QPE) Steps
+### 2.1 <a name="qpe"></a>Quantum Phase Estimation (QPE) Steps
 
 1. ***Setup*** 
       * Start with a quantum state, usually in the form of |ψ⟩, that is an eigenstate of a unitary operator **U**.
@@ -70,7 +86,7 @@ The following example is a QPE circuit for a Z-gate using 3 ancilla qubits.
     <img width="90%" src="quantum_phase_estimation_z_gate.png">
 </p>
 
-### Walkthrough of the HHL algorithm
+### 2.2 <a name="hhl"></a>Walkthrough of the HHL algorithm
 
 Now, let's go over the HHL algorithm, guided by some exemplary code snippets. A detailed walkthrough of the algorithm can be found in [Qiskit's tutorial](https://github.com/Qiskit/textbook/blob/main/notebooks/ch-applications/hhl_tutorial.ipynb). Here, we provide guidance on the overall procedure, as a background to run the codes. For a system of $N$ linear equations $A\vec{x}=\vec{b}$ (size of $A$ is $N \times N$), the objective of the HHL algorithm is to represent the solution vector $\vec{x}$ in terms of the eigenbasis of the $A$ matrix:
 $$\ket{x} = A^{-1} \ket{b} = \sum_j \lambda^{-1}_jb_j\ket{u_j}$$
@@ -166,7 +182,9 @@ We note that measuring the entire solution state can lead to loss of the computa
 
 The detailed code with all the components can be found [here](https://github.com/jw676/quantum_linear_solvers/blob/a94cf634f77a9061c95baf95b4d3bf6baa9de477/linear_solvers/hhl.py#L323).
 
-### Workflow of the code
+### 2.3 <a name="workflow"></a>Workflow of our code
+
+Now that we've walked through the HHL algorithm in general, now let's cover the code that we'll be using for the challenges.
 
 The codebase comprises two main Python scripts: [`circuit_HHL.py`](circuit_HHL.py) and [`solver.py`](solver.py). The first generates the HHL circuit and the second runs it with a specific backend (simulator, emulator, or QPU). Our codebase follows the following workflow for solving a given system of linear equations:
 
@@ -199,7 +217,7 @@ The code snippets discussed in the [HHL section](#walkthrough-of-the-hhl-algorit
 
 Finally, we run the generated HHL circuit using a given backend - simulator, emulator, or QPU. The main function call is [`qc_circ()`](https://github.com/olcf/hands-on-with-odo/blob/f3c1ff9c4adfa9ad7f6d77d7fe139a86f893689b/challenges/Python_QLSA/solver.py#L74), encompassed in the script [`func_qc.py`](func_qc.py). The process of running the circuit involves (1) selecting and initializing the [backend](https://github.com/olcf/hands-on-with-odo/blob/f3c1ff9c4adfa9ad7f6d77d7fe139a86f893689b/challenges/Python_QLSA/func_qc.py#L95), (2) [transpile](https://github.com/olcf/hands-on-with-odo/blob/f3c1ff9c4adfa9ad7f6d77d7fe139a86f893689b/challenges/Python_QLSA/func_qc.py#L119) the circuit for the particular backend, and (3) [run](https://github.com/olcf/hands-on-with-odo/blob/f3c1ff9c4adfa9ad7f6d77d7fe139a86f893689b/challenges/Python_QLSA/func_qc.py#L159) the transpiled circuit.
 
-### Implications of quantum algorithms
+### 2.4 <a name="impl"></a>Implications of quantum algorithms
 
 One final thing to note before diving into the code, is the significance of probabilistic computing. Imagine you used your phone to take a photo of the beautiful Smoky Mountains, but when you went to show your friends, you couldn't find the photo! The next day, you contemplate how odd that was, so you look once more in your photos folder and the Smoky Mountains are magically there! You repeat this over and over, but the photo only shows up some of the time. If you measured how often you saw the photo, you would notice that there is a probability associated with its appearance (maybe around 50%). Afterwards, you'd throw your phone away with 100% probability because that's no way to maintain a filesystem!
 
@@ -209,7 +227,7 @@ For example, if you'd flip a coin 3 times (i.e., 3 shots), and got heads each ti
 
 In this crash course, we will observe the effects of the number of shots has on our final results. So without further ado, let's begin coding!
 
-## Setting Up Our Environment
+## 3. <a name="setup"></a>Setting Up Our Environment
 First, we will move to the challenge directory, unload all current modules you may have previously loaded on Odo, and deactivate any previously loaded environments. 
 ```
 # Move to the challenge directory (assuming you cloned the repo in your home directory)
@@ -234,9 +252,9 @@ $ which python3
 /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qlsa-solver/bin/python3
 ```
 
-## Overview of How to Run
+## 4. <a name="overview"></a>Overview of How to Run
 
-### Obtaining your IQM Key
+### 4.1 <a name="keys"></a>Obtaining your IQM Key
 
 Before running the code, it is important to obtain your IQM token so that you can run the circuits on actual quantum devices.
 
@@ -255,7 +273,7 @@ Before running the code, it is important to obtain your IQM token so that you ca
 $ source keys.sh
 ```
 
-### (Optional) Testing the Code 
+### 4.2 <a name="testing"></a>(Optional) Testing the Code 
 
 It is also advisable to test the code first to ensure the environment is set up correctly.
 
@@ -326,7 +344,7 @@ It is also advisable to test the code first to ensure the environment is set up 
       ```
       </details>
 
-### Running the QLSA Code
+### 4.3 <a name="qlsa"></a>Running the QLSA Code
 
 The instructions below are mainly for **running interactively** on OLCF Odo. The first time you run the Python scripts, it may take some time to load the libraries.
 
@@ -373,7 +391,7 @@ The general workflow is to (1) Start an interactive job (or batch job) to use Od
   
 > **Note:** Alternative to all of the above, you can use the batch script [`submit_odo_example.sh`](submit_odo_example.sh) to [submit a batch job on OLCF Odo](https://docs.olcf.ornl.gov/systems/frontier_user_guide.html#batch-scripts) using `sbatch --export=NONE submit_odo_example.sh`. The `submit_odo_example.sh` example batch script is already setup with the above steps; however, modifying that file is required if you want to change any python script arguments (like shot count).
 
-## Challenges
+## 5. <a name="chall"></a>Challenges
 
 Now that you've tested out the code and environment, let's get to the challenge objectives!
 You'll be using a simulator, emulator, and real quantum hardware to study the fidelity of each method over a range of shots.
@@ -396,7 +414,7 @@ Below are the two objectives:
 
 > **Hint:** [`plot_fidelity_vs_shots.py`](plot_fidelity_vs_shots.py) can be executed after running all of the production runs for every shot and backend combination for Objective 1 and 2 to help you compare.
 
-# References
+# 6. <a name="ref"></a>References
 * A. W. Harrow, A. Hassidim, and S. Lloyd, "Quantum algorithm for linear systems of equations," [Phys. Rev. Lett. 103, 150502](https://doi.org/10.1103/PhysRevLett.103.150502) (2009).
 * S. S. Bharadwaj and K. R. Sreenivasan, "Quantum computation of fluid dynamics," [arXiv:2007.09147](https://doi.org/10.48550/arXiv.2007.09147) (2020).
 * M. Gopalakrishnan Meena, K. C. Gottiparthi, J. G. Lietz, A. Georgiadou, and E. A. Coello Pérez, "Solving the Hele-Shaw flow using the Harrow-Hassidim-Lloyd algorithm on superconducting devices: A study of efficiency and challenges," [Physics of Fluids, 36 (10): 101705](https://doi.org/10.1063/5.0231929), (2024). ([preprint](http://arxiv.org/abs/2409.10857), [code](https://doi.org/10.5281/zenodo.13738192) - the current repo is adapted from this code)
