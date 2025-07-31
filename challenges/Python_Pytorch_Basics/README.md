@@ -751,20 +751,23 @@ If you liked PyTorch I also suggest taking a look at [PyTorch Lightning](https:/
 
 ### 5.1 <a name="leaderboard"></a>Leaderboard
 
-Below is a top 10 leaderboard of peoples' best CNNs that achieved >60% accuracy within an hour of walltime on Odo!
+Below is a top 10 leaderboard of peoples' best CNNs that achieved >60% accuracy within an hour of walltime on Odo! (DM one of the organizers if you want to be considered)
 
 Top Accuracy:
 
 | Rank  | Name             | Program                       | Accuracy | Speed   |
 | :---  | :---             | :---------:                   | :------: | :---:   |
-| 1.    | AAAA B.          | Summer HPC-CC 2024            | 66.53%   | 910s    |
+| 1.    | Fernando H.      | Summer HPC-CC 2025            | 77.32%   | 203s    |
+| 2.    | Christian G.     | Summer HPC-CC 2025            | 67.15%   | 997s    |
+| 3.    | Celeste L.       | Summer HPC-CC 2025            | 66.3%    | 724s    |
 
 
 Top Speed:
 
 | Rank  | Name             | Program                       | Accuracy | Speed   |
 | :---  | :---             | :---------:                   | :------: | :---:   |
-| 1.    | AAAA B.          | Summer HPC-CC 2024            | 62.27%   | 556s    |
+| 1.    | Christian G.     | Summer HPC-CC 2025            | 61.45%   | 383s    |
+| 2.    | Celeste L.       | Summer HPC-CC 2025            | 62.39%   | 526s    |
 
 
 ## 6. <a name="install"></a>Environment Information
