@@ -114,8 +114,10 @@ class ConvNet(nn.Module):
 #################### CNN WORKFLOW ##########################
 
 # Device configuration
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-print('The device you are using is: ',device)
+# Redundant but necessary on some systems for some reason
+print(f"Using device {torch.cuda.current_device()}")
+torch.cuda.set_device(0)
+device = torch.cuda.current_device() 
 
 # Hyper-parameters 
 num_epochs = 4 # CHANGE-ME
