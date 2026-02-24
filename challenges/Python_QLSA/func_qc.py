@@ -26,6 +26,7 @@ from qiskit_ibm_runtime import RuntimeEncoder
 from qiskit_ibm_runtime.fake_provider import FakeProviderForBackendV2
 from qiskit_ibm_runtime import QiskitRuntimeService
 from iqm.qiskit_iqm import IQMProvider
+from qiskit_ionq import IonQProvider
 
 import matplotlib.pyplot as plt
 
@@ -54,9 +55,8 @@ def qc_backend(backend_type, backend_method, args):
             instance = os.getenv('IBMQ_INSTANCE')
             # save your QiskitRuntimeService accout for future loading
             QiskitRuntimeService.save_account(
-              channel="ibm_quantum",
-              instance=instance,
               token=API_KEY,
+              instance=instance,
               overwrite=True
             )
             service = QiskitRuntimeService()
@@ -73,6 +73,18 @@ def qc_backend(backend_type, backend_method, args):
                 raise Exception('Unknown fake backend.')
         else:
             backend = IQMProvider(server_url, token=API_KEY).get_backend()
+    elif backend_type=='real-ionq':
+        # save your IonQ account for future loading
+        API_KEY = os.getenv('IONQ_API_KEY')
+        provider = IonQProvider(API_KEY)
+        if "qpu." in backend_method: # real hardware
+            backend = provider.get_backend(f"{backend_method}", gateset='qis')
+        else: # emulator: add noise to simulator to obtain emulator
+            backend = provider.get_backend("simulator", gateset='qis')
+            backend.set_options(shots=args.SHOTS, sampler_seed=np.random.randint(100), noise_model=backend_method)
+        if args.SHOTS > 500: # NOTE: specific for OLCF tutorial resource limitation
+            print(f"Please use only 500 shots when running on IonQ. Continuing with shots=500...")
+            args.SHOTS = 500
     else:
         raise Exception(f'Backend type \'{backend_type}\' not implemented.')
     return backend
@@ -131,11 +143,13 @@ def qc_circ(n_qubits_matrix, classical_solution, args, input_vars):
     else:
         if args.backend_type in ('real-iqm'):
             from iqm.qiskit_iqm import transpile_to_IQM as transpile
-            if args.backend_method in ('fake_garnet'):
-                from qiskit.transpiler.passes import RemoveResetInZeroState
-                circ = RemoveResetInZeroState()(circ.decompose())
         else:
             from qiskit import transpile
+
+        if args.backend_type in ('real-iqm', 'real-ionq'):
+            from qiskit.transpiler.passes import RemoveResetInZeroState
+            circ = RemoveResetInZeroState()(circ.decompose())
+
         t = time.time()
         isa_circ = transpile(circ, backend)
         t_transpile = time.time() - t
@@ -162,7 +176,7 @@ def qc_circ(n_qubits_matrix, classical_solution, args, input_vars):
     t = time.time()
     
     # Run the job
-    if args.backend_type in ('real-iqm'):
+    if args.backend_type in ('real-iqm', 'real-ionq'):
         job = backend.run(isa_circ, shots=shots)
     elif args.backend_type in (['real-ibm','ideal']):
         sampler = Sampler(backend)
@@ -178,7 +192,7 @@ def qc_circ(n_qubits_matrix, classical_solution, args, input_vars):
         flush=True)
     
     # Returns counts
-    if args.backend_type in ('real-iqm'):
+    if args.backend_type in ('real-iqm', 'real-ionq'):
         counts = result.get_counts()
     elif args.backend_type in (['real-ibm','ideal']):
         counts = result[0].data.meas.get_counts()
