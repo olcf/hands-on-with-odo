@@ -6,6 +6,7 @@ Here we provide a sample implementation of a QLSA, the [Harrow–Hassidim–Lloy
 
 1. [IQM](https://www.meetiqm.com/) (used in this crash course)
 2. [IBM quantum-computing](https://quantum-computing.ibm.com/)
+3. [IonQ](https://docs.ionq.com/) 
 
 An application to fluid dynamics is also provided. The fluid dynamics use case follows the work of [Bharadwaj & Srinivasan (2020)](https://www.sto.nato.int/publications/STO%20Educational%20Notes/STO-EN-AVT-377/EN-AVT-377-01.pdf) and [Gopalakrishnan Meena et al. (2024)](https://doi.org/10.1063/5.0231929). 
 
@@ -28,7 +29,7 @@ Table of Contents:
 ## 1. <a name="sig"></a>Significance of the HHL Algorithm
 The HHL algorithm represents a monumental breakthrough in quantum computing, allowing for the efficient solution of linear systems of equations, a ubiquitous subtask that underlies numerous scientific and engineering applications. Traditional algorithms struggle with large-scale data sets, often resulting in extreme computational costs (O(N<sup>m</sup>) for solving N equations and m&ge;1). In contrast, the HHL algorithm harnesses the power of quantum mechanics to deliver an exponential (O(log N)) speedup, enabling faster computations that can solve complex problems in fields such as optimization, machine learning, and fluid dynamics!
 
-Understanding the HHL algorithm not only showcases the unique advantages of quantum computing but also opens the door to innovative applications that were previously unimaginable in classical computing. As we work through this challenge, we will explore the foundational principles and mathematical theory behind subroutines in the HHL algorithm. For specifics on how quantum computing works, please see our [`Python_QML_Basics`](../Python_QML_Basics) challenge.
+Understanding the HHL algorithm not only showcases the unique advantages of quantum computing but also opens the door to innovative applications that were previously unimaginable in classical computing. As we work through this challenge, we will explore the foundational principles and mathematical theory behind subroutines in the HHL algorithm. For specifics on how quantum computing works, please see our [`Quantum Primer`](../../presentations/Quantum_Primer_70125.pdf) presentation or [`Python_QML_Basics`](../Python_QML_Basics) challenge.
 
 ## 2. <a name="primer"></a>Quantum Algorithms Primer
 
@@ -346,16 +347,11 @@ It is also advisable to test the code first to ensure the environment is set up 
 
 ### 4.3 <a name="qlsa"></a>Running the QLSA Code
 
-The instructions below are mainly for **running interactively** on OLCF Odo. The first time you run the Python scripts, it may take some time to load the libraries.
+The general workflow is to (1) Load the appropriate Python `conda` environment, (2) Generate the circuit, (3) Run the QLSA solver with the circuit you just generated, and (4) Analyze your results
 
-The general workflow is to (1) Start an interactive job (or batch job) to use Odo's compute nodes, (2) Load the appropriate Python `conda` environment, (3) Generate the circuit, (4) Run the QLSA solver with the circuit you just generated, and (5) Analyze your results
+These steps are included in your `sbatch submit_anvil_example.sh` file that you'll submit with `sbatch`:
 
-1. Start interactive job
-    ```
-    $ salloc -A PROJECT_ID -p batch -N 1 -t 0:30:00
-    ```
-
-2. Load Python environment:
+1. Load Python environment:
     * When targeting real quantum backends, you must go through a [proxy server for connecting outside OLCF](https://docs.olcf.ornl.gov/quantum/quantum_software/hybrid_hpc.html#batch-jobs) due to the Odo compute nodes being closed off from the internet by default. 
       ```
       $ source ~/hands-on-with-odo/misc_scripts/proxies.sh
@@ -369,27 +365,30 @@ The general workflow is to (1) Start an interactive job (or batch job) to use Od
       ```
       $ source activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qlsa-solver 
       ```
-3. Run QLSA circuit generator script: [`circuit_HHL.py`](circuit_HHL.py)
-   Before we run the solver in step #4, we first have to generate the circuit that will be used.
+2. Run QLSA circuit generator script: [`circuit_HHL.py`](circuit_HHL.py)
+   Before we run the solver in step #3, we first have to generate the circuit that will be used.
     ```
     $ srun -N1 -n1 -c1 python3 circuit_HHL.py -case sample-tridiag -casefile input_vars.yaml --savedata
     ```
     > **WARNING:** make sure to save the generated circuit with `--savedata` flag; otherwise, you will be unable to run the QLSA solver in the next step.
-4. Run the QLSA solver: [`solver.py`](solver.py)
+3. Run the QLSA solver: [`solver.py`](solver.py)
    Running the `solver.py` code uses the circuit previously generated and runs the QLSA on a specific backend for a given amount of shots.
     ```
     $ srun -N1 -n1 -c2 python3 solver.py -case sample-tridiag -casefile input_vars.yaml -s 1000 --savedata -backtyp ideal
     ```
     * The above example uses 1000 shots (e.g., `-s 1000`) and a simulator backend (e.g., `-backtyp ideal`).
     * To run the script on actual hardware, use the `-backtyp real-iqm -backmet garnet` flags.
+    * If the queue is long, you can retrieve your job results later using the [`solver_getjob.py`](solver_getjob.py) code. Use the job-id from the output of the [`solver.py`](solver.py) code or the vendor's cloud portal.
     > **WARNING:** make sure to save the runs you want with `--savedata` flag; otherwise, you will be unable to generate a plot for the objectives.
 
-5. Plot your results: [`plot_fidelity_vs_shots.py`](plot_fidelity_vs_shots.py)
+4. Plot your results: [`plot_fidelity_vs_shots.py`](plot_fidelity_vs_shots.py)
     ```
     $ python3 plot_fidelity_vs_shots.py
     ```
   
-> **Note:** Alternative to all of the above, you can use the batch script [`submit_odo_example.sh`](submit_odo_example.sh) to [submit a batch job on OLCF Odo](https://docs.olcf.ornl.gov/systems/frontier_user_guide.html#batch-scripts) using `sbatch --export=NONE submit_odo_example.sh`. The `submit_odo_example.sh` example batch script is already setup with the above steps; however, modifying that file is required if you want to change any python script arguments (like shot count).
+> **Note 1:** The `submit_odo_example.sh` example batch script is already setup with the above steps; however, modifying that file is required if you want to change any python script arguments (like shot count).
+
+> **Note 2:** Alternative to submitting the script over and over with `sbatch`, you can launch an interactive job to more quickly test different configurations like so: `salloc -A PROJECT_ID -p batch -N 1 -t 0:30:00`
 
 ## 5. <a name="chall"></a>Challenges
 
