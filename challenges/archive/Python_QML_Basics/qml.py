@@ -25,10 +25,10 @@ n_qubits = 4                # Number of qubits
 q_depth = 6                 # Depth of the quantum circuit (number of variational layers)
 q_delta = 0.01              # Initial spread of random quantum weights
 
-def setup(rank, world_size):
+def setup(rank, world_size,quantum:bool=True):
     # initialize the process group
     dist.init_process_group(backend='nccl', init_method='env://', world_size=world_size, rank=rank)
-    train_model(rank,world_size)
+    train_model(rank,world_size,quantum)
 
 def H_layer(nqubits):
     """Layer of single-qubit Hadamard gates.
@@ -120,9 +120,7 @@ class DressedQuantumNet(nn.Module):
         # return the two-dimensional prediction from the postprocessing layer
         return self.post_net(q_out)
 
-
-
-def train_model(rank, world_size): #model, criterion, optimizer, scheduler, num_epochs):
+def train_model(rank, world_size,quantum): #model, criterion, optimizer, scheduler, num_epochs):
     torch.cuda.set_device(0) #assuming 1 gpu per MPI rank on Odo
     device = torch.cuda.current_device()
     print(f"Rank {rank} is using device {torch.cuda.current_device()}")
@@ -134,12 +132,12 @@ def train_model(rank, world_size): #model, criterion, optimizer, scheduler, num_
     start_time = time.time()    # Start of the computation timer
 
     model = torchvision.models.resnet18(pretrained=True)
-        
-    for param in model.parameters():
-        param.requires_grad = False
-    
-    # Notice that model_hybrid.fc is the last layer of ResNet18
-    model.fc = DressedQuantumNet(device=device)
+
+    if quantum:
+        for param in model.parameters():
+            param.requires_grad = False
+        # Notice that model_hybrid.fc is the last layer of ResNet18
+        model.fc = DressedQuantumNet(device=device)
 
     model = model.to(device)
     ddp_model = DDP(model, device_ids=[device])
@@ -289,7 +287,7 @@ def train_model(rank, world_size): #model, criterion, optimizer, scheduler, num_
                 best_acc_train = epoch_acc
             if phase == "train" and epoch_loss < best_loss_train:
                 best_loss_train = epoch_loss
-      
+
             # Update learning rate
             if phase == "train":
                 scheduler.step()
@@ -334,4 +332,5 @@ if __name__ == "__main__":
     os.environ['MASTER_PORT'] = '29500'
     os.environ['NCCL_SOCKET_IFNAME'] = 'hsn0'
     print(f'Total GPUs being used this run: {world_size}')
-    setup(rank, world_size)
+    USE_QUANTUM = int(os.environ['USE_QUANTUM'])
+    setup(rank, world_size,quantum=USE_QUANTUM)

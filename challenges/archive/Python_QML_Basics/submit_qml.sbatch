@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -A TRN039
+#SBATCH -A STF007
 #SBATCH -J qml_basics
 #SBATCH -o %x-%j.out
 #SBATCH -N 1
@@ -20,7 +20,7 @@ module load rocm/6.1.3
 module load craype-accel-amd-gfx90a
 module load miniforge3
 
-source activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qml-odo
+source activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/temp
 
 # Needed to bypass MIOpen, Disk I/O Errors
 export MIOPEN_USER_DB_PATH="/mnt/bb/${USER}/my-miopen-cache" 
@@ -40,4 +40,6 @@ export http_proxy=http://proxy.ccs.ornl.gov:3128/
 export https_proxy=http://proxy.ccs.ornl.gov:3128/
 export no_proxy='localhost,127.0.0.0/8,*.ccs.ornl.gov'
 
-srun -n1 -c7 --gpus-per-task=1 --gpu-bind=closest python3 -W ignore -u qml.py
+export USE_QUANTUM=1
+
+srun -n1 -c7 --gpus-per-task=1 --gpu-bind=closest python3 -W ignore -u qml.py 
