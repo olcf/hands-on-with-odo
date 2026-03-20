@@ -25,6 +25,31 @@ n_qubits = 4                # Number of qubits
 q_depth = 6                 # Depth of the quantum circuit (number of variational layers)
 q_delta = 0.01              # Initial spread of random quantum weights
 
+def save_checkpoint(state, ckpt_path, rank):
+    # What was used to save checkpoint previously, not used in this script.
+    # Only rank 0 writes to avoid corruption
+    if rank == 0:
+        os.makedirs(os.path.dirname(ckpt_path), exist_ok=True)
+        torch.save(state, ckpt_path)
+
+def load_checkpoint(ckpt_path, map_location, model, optimizer=None, scheduler=None):
+    ckpt = torch.load(ckpt_path, map_location=map_location)
+
+    model.load_state_dict(ckpt["model_state_dict"], strict=True)
+
+    if optimizer is not None and "optimizer_state_dict" in ckpt:
+        optimizer.load_state_dict(ckpt["optimizer_state_dict"])
+    if scheduler is not None and "scheduler_state_dict" in ckpt:
+        scheduler.load_state_dict(ckpt["scheduler_state_dict"])
+
+    start_epoch = ckpt.get("epoch", -1) + 1
+    best_acc = ckpt.get("best_acc", 0.0)
+    best_loss = ckpt.get("best_loss", 1e9)
+    best_acc_train = ckpt.get("best_acc_train", 0.0)
+    best_loss_train = ckpt.get("best_loss_train", 1e9)
+
+    return start_epoch, best_acc, best_loss, best_acc_train, best_loss_train
+
 def H_layer(nqubits):
     """Layer of single-qubit Hadamard gates.
     """
@@ -50,6 +75,10 @@ def entangling_layer(nqubits):
     for i in range(1, nqubits - 1, 2):  # Loop over odd indices:  i=1,3,...N-3
         qml.CNOT(wires=[i, i + 1])
 
+#from iqm.qiskit_iqm import IQMProvider, transpile_to_IQM
+#provider = IQMProvider("https://resonance.meetiqm.com/", quantum_computer="garnet") #API Token is set by "IQM_TOKEN" env var external to this script
+#backend = provider.get_backend()
+#dev = qml.device("qiskit.remote", wires=n_qubits,backend=backend,shots=1024)
 
 dev = qml.device("lightning.kokkos", wires=n_qubits,shots=None)
 @qml.qnode(dev, interface="torch")
@@ -122,9 +151,15 @@ def train_model(rank, world_size, quantum:bool=True):
     device = torch.cuda.current_device()
     print(f"Rank {rank} is using device {torch.cuda.current_device()}")
 
+    # ---- checkpoint config ----
+    ckpt_dir = "/gpfs/wolf2/olcf/stf007/world-shared/9b8/qml_checkpoint"
+    ckpt_path = os.path.join(ckpt_dir, "last.pt")
+    resume = True  # load checkpoint file
+    # ---------------------------
+
     step = 0.0004               # Learning rate
     batch_size = 4              # Number of samples for each training step
-    num_epochs = 30             # Number of training epochs
+    num_epochs = 5              # Number of training epochs
     gamma_lr_scheduler = 0.1    # Learning rate reduction applied every 10 epochs.
     start_time = time.time()    # Start of the computation timer
 
@@ -167,7 +202,7 @@ def train_model(rank, world_size, quantum:bool=True):
         ),
     }
 
-    data_dir = '/gpfs/wolf2/olcf/stf007/world-shared/9b8/hymenoptera_data'
+    data_dir = '/gpfs/wolf2/olcf/stf007/world-shared/9b8/hymenoptera_data_small'
 
     image_datasets = {
         x if x == "train" else "validation": datasets.ImageFolder(
@@ -197,13 +232,27 @@ def train_model(rank, world_size, quantum:bool=True):
     best_acc_train = 0.0
     best_loss_train = 10000.0  # Large arbitrary number
 
+    # ---- resume (all ranks load) ----
+    start_epoch = 0
+    if resume and os.path.isfile(ckpt_path):
+        # Map to the local GPU for this rank
+        map_location = {"cuda:0": f"cuda:{device}"}
+        start_epoch, best_acc, best_loss, best_acc_train, best_loss_train = load_checkpoint(
+            ckpt_path, map_location, model, optimizer, scheduler
+        )
+        best_model_wts = copy.deepcopy(model.state_dict())
+        if rank == 0:
+            print(f"Resumed from {ckpt_path} at epoch {start_epoch}")
+    dist.barrier()
+    # --------------------------------
+
     if (rank==0):
         print("Training started:")
 
     for epoch in range(num_epochs):
 
         # Each epoch has a training and validation phase
-        for phase in ["train", "validation"]:
+        for phase in ["validation"]:
             if phase == "train":
                 # Set model to training mode
                 model.train()
@@ -286,6 +335,24 @@ def train_model(rank, world_size, quantum:bool=True):
             # Update learning rate
             if phase == "train":
                 scheduler.step()
+
+        # What was used to save checkpoint previously, not used here.
+        # ---- save checkpoint at end of each epoch (rank 0 only) ----
+        #if epoch==29:
+        #    # Save the underlying model state_dict (not ddp_model) to keep it simple
+        #    state = {
+        #        "epoch": epoch,
+        #        "model_state_dict": model.state_dict(),
+        #        "optimizer_state_dict": optimizer.state_dict(),
+        #        "scheduler_state_dict": scheduler.state_dict(),
+        #        "best_acc": best_acc,
+        #        "best_loss": best_loss,
+        #        "best_acc_train": best_acc_train,
+        #        "best_loss_train": best_loss_train,
+        #    }
+        #    save_checkpoint(state, ckpt_path, rank)
+        #dist.barrier()
+        # -----------------------------------------------------------
 
     # Print final results
     model.load_state_dict(best_model_wts)

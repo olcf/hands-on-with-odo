@@ -1,26 +1,22 @@
 #!/bin/bash
-#SBATCH -A TRN039
+#SBATCH -A TRN044
 #SBATCH -J qml_basics
 #SBATCH -o %x-%j.out
 #SBATCH -N 1
-#SBATCH -t 0:20:00
+#SBATCH -t 0:30:00
 #SBATCH -p batch
 #SBATCH -C nvme
-
-# Only necessary if submitting like: sbatch --export=NONE ... (recommended)
-# Do NOT include this line when submitting without --export=NONE
-unset SLURM_EXPORT_ENV
 
 cd $SLURM_SUBMIT_DIR
 date
 
 # Load modules
-module load PrgEnv-gnu/8.6.0 
-module load rocm/6.1.3
+module load PrgEnv-amd/8.6.0 
+module load amd/6.4.1
 module load craype-accel-amd-gfx90a
 module load miniforge3
 
-source activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qml-odo
+conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qml-odo
 
 # Needed to bypass MIOpen, Disk I/O Errors
 export MIOPEN_USER_DB_PATH="/mnt/bb/${USER}/my-miopen-cache" 
@@ -40,4 +36,11 @@ export http_proxy=http://proxy.ccs.ornl.gov:3128/
 export https_proxy=http://proxy.ccs.ornl.gov:3128/
 export no_proxy='localhost,127.0.0.0/8,*.ccs.ornl.gov'
 
+source keys.sh 
+
+export USE_QUANTUM=1
+
 srun -n1 -c7 --gpus-per-task=1 --gpu-bind=closest python3 -W ignore -u qml.py
+
+# Don't run the below on multiple ranks, just -n1
+#srun -n1 -c7 --gpus-per-task=1 --gpu-bind=closest python3 -W ignore -u qml_eval.py
