@@ -29,20 +29,20 @@ $ module reset
 The `source deactivate_envs.sh` command is only necessary if you already have existing conda environments active.
 The script unloads all of your previously activated conda environments, and no harm will come from executing the script if that does not apply to you.
 
-Next, we will load the GNU compiler module (most Python packages assume GCC), the GPU module:
+Next, we will load the modules necessary for our conda environment (various GPU modules and the conda module):
 
 ```bash
-$ module load PrgEnv-gnu/8.6.0 
-$ module load rocm/6.1.3
+$ module load PrgEnv-amd/8.6.0
+$ module load amd/6.4.1
+$ module load rocm/6.4.1
 $ module load craype-accel-amd-gfx90a
 $ module load miniforge3
 ```
 
-We loaded the "base" conda environment, but we need to activate a pre-built conda environment that has PennyLane and PyTorch.
-Due to the specific nature of conda on Odo, we will be using `source activate` instead of `conda activate` to activate our new environment:
+We loaded the "base" conda environment, but we need to activate a pre-built conda environment that has PennyLane and PyTorch:
 
 ```bash
-$ source activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qml-odo
+$ conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qml-odo
 ```
 
 The path to the environment should now be displayed in "( )" at the beginning of your terminal lines, which indicates that you are currently using that specific conda environment.
@@ -56,6 +56,8 @@ $ which python3
 ## Quantum Primer
 
 Before we run the code, it is important to understand the process that the code will perform. We will start by analyzing quantum computing and figuring out why it is so readily optimized into ML applications.
+
+> Note: For a more complete introduction to quantum computing, please see our [`Quantum Primer`](../../presentations/Quantum_Primer_70125.pdf) presentation.
 
 ### Qubits
 
@@ -183,16 +185,7 @@ q_delta = 0.01              # Initial spread of random quantum weights
 
 There are a lot of functions in this code, so we will be covering them one by one below!
 
-The `setup` function sets up the process group, it is what tells PyTorch to prep for distributed training. This group will then call the `train_model` function to train the model (described further below).
-
-```python
-def setup(rank, world_size):
-    # initialize the process group
-    dist.init_process_group(backend='nccl', init_method='env://', world_size=world_size, rank=rank)
-    train_model(rank,world_size)
-```
-
-The next three layers define much of the quantum-related part of the code. The first `H_layer` puts the qubits into superposition. As defined above, this means that the qubits are initialized to have an output of either 1 or 0 with 50% odds. This weighting changes depending on the operations of other gates later in the circuit. Already sounds like a Convolutional Neural Network, right? H or Hadamard gates are the gates needed to put a qubit in superposition, so the `H_layer` function just does that for each qubit. 
+The first three functions define much of the quantum-related part of the code. The first `H_layer` puts the qubits into superposition. As defined above, this means that the qubits are initialized to have an output of either 1 or 0 with 50% odds. This weighting changes depending on the operations of other gates later in the circuit. Already sounds like a Convolutional Neural Network, right? H or Hadamard gates are the gates needed to put a qubit in superposition, so the `H_layer` function just does that for each qubit. 
 
 ```python
 def H_layer(nqubits):
@@ -231,12 +224,12 @@ def entangling_layer(nqubits):
         qml.CNOT(wires=[i, i + 1])
 ```
 
-The next two lines of code define the backend for the PennyLane part of the code. The first sets the `dev` variable to a specific PennyLane "device" or "backend" to run the Quantum portions on. In this case we're using the `lightning.kokkos` simulator. Quantum simulators are a classical computer's way of simulating a quantum computer. The `lightning.kokkos` simulator allows us to run this code on AMD GPUs using the [Kokkos](https://kokkos.org/kokkos-core-wiki/) programming model (as opposed to something like CUDA or HIP). Yes, this code works on real quantum backends, and this is the line of code where you can make that happen, but it is extremely inefficient due to queueing latency to cloud-based backends -- especially when multiple GPUs would need to wait in the queue (i.e., that latency problem is a bit better when only using 1 GPU, but still has non-negligible overhead).
+The next two lines of code define the backend for the PennyLane part of the code. The first sets the `dev` variable to a specific PennyLane "device" or "backend" to run the Quantum portions on. In this case we're using the `lightning.kokkos` simulator. Quantum simulators are a classical computer's way of simulating a quantum computer. The `lightning.kokkos` simulator allows us to run this code on AMD GPUs using the [Kokkos](https://kokkos.org/kokkos-core-wiki/) programming model (as opposed to something like CUDA or HIP). Yes, this code works on real quantum backends, and this is the line of code where you can make that happen, but it is extremely inefficient due to queueing latency to cloud-based backends -- especially when multiple GPUs would need to wait in the queue (i.e., that latency problem is a bit better when only using 1 GPU, but still has non-negligible overhead). PennyLane will use this simulator to solve things analytically (exact calculations) by default -- doing so simulates an ideal scenario. If you pass a value for the `shots` argument, PennyLane will generate a distribution of samples by running the same circuit multiple times, thus simulating the probabilistic behavior of quantum hardware (introduces noise).
 
 The next line tells the simulator that `torch` (PyTorch) will be used in the code, so the interface is set to allow for PennyLane to integrate with the various PyTorch data structures and commands. Whether you are using a real quantum backend or not, this line would be needed, as the non-quantum portions of the code will be using PyTorch. 
 
 ```python
-dev = qml.device("lightning.kokkos", wires=n_qubits)
+dev = qml.device("lightning.kokkos", wires=n_qubits,shots=None)
 @qml.qnode(dev, interface="torch")
 ```
 
@@ -318,14 +311,14 @@ As you may notice, at the top there are a few more hyperparameters that were not
 Additionally, we setup for `DDP` to split the calculations into [GPU] pieces, so the print will display "cuda:[#0-7]" for which GPU analyzed that particular part of the data. With the way we are running our script on Odo (1 GPU per MPI rank), each process only sees their own "cuda:0" w/ GPU ID 0, even if you run with 8 GPUs per node.
 
 ```python
-def train_model(rank, world_size): 
+def train_model(rank, world_size, quantum:bool=True):
     torch.cuda.set_device(0) #assuming 1 gpu per MPI rank on Odo
     device = torch.cuda.current_device()
     print(f"Rank {rank} is using device {torch.cuda.current_device()}")
 
     step = 0.0004               # Learning rate
     batch_size = 4              # Number of samples for each training step
-    num_epochs = 30              # Number of training epochs
+    num_epochs = 30             # Number of training epochs
     gamma_lr_scheduler = 0.1    # Learning rate reduction applied every 10 epochs.
     start_time = time.time()    # Start of the computation timer
 ```
@@ -338,14 +331,18 @@ When we say that the model is pre-trained, that just means that everything but t
     model = torchvision.models.resnet18(pretrained=True)
 ```
 
-Most of the next lines are defining the correct starting point for the training and then noting which GPU will be analyzing which part of the subset. However, one thing of note is the `model.fc` variable. Modifying `model.fc` changes the final fully connected layer of ResNet18; here, this is where we integrate our custom Quantum network into the model (i.e., we replace the final layer with `DressedQuantumNet`).
+Most of the next lines are defining the correct starting point for the training and then noting which GPU will be analyzing which part of the subset. However, one thing of note is the `model.fc` variable. Modifying `model.fc` changes the final fully connected layer of ResNet18; here, this is where we integrate our custom Quantum network into the model (i.e., we replace the final layer with `DressedQuantumNet`). Although we are investigating the effects of using a quantum network in this code, we have included the possibility to run a purely classical version when passing `quantum=False` when calling the training function. This allows us to compare the results of our quantum approach to the classical approach.
 
 ```python
     for param in model.parameters():
         param.requires_grad = False
 
-    # Notice that model_hybrid.fc is the last layer of ResNet18
-    model.fc = DressedQuantumNet(device=device)
+    # model.fc is the last layer of ResNet18
+    if quantum:
+        model.fc = DressedQuantumNet(device=device)
+    else:
+        num_ftrs = model.fc.in_features
+        model.fc = nn.Linear(num_ftrs, 2)
 
     model = model.to(device)
     ddp_model = DDP(model, device_ids=[device])
@@ -361,8 +358,6 @@ Finally, here is where the data is processed. This takes the ants and bees image
     data_transforms = {
         "train": transforms.Compose(
             [
-                # transforms.RandomResizedCrop(224),     # uncomment for data augmentation
-                # transforms.RandomHorizontalFlip(),     # uncomment for data augmentation
                 transforms.Resize(256),
                 transforms.CenterCrop(224),
                 transforms.ToTensor(),
@@ -471,10 +466,6 @@ Once the data is in the correct format, we start the actual training and validat
                     )
                 it += 1
 
-            # Print epoch results
-            #epoch_loss = running_loss / running_preds
-            #epoch_acc = running_corrects / running_preds
-
             acc_tensor = torch.tensor([running_loss,running_corrects,running_preds])
             acc_tensor = acc_tensor.to(device)
             dist.all_reduce(acc_tensor, op=dist.ReduceOp.SUM)
@@ -529,7 +520,7 @@ Once the data is in the correct format, we start the actual training and validat
 
 Finally, there is one more part of the code, and coincidentally, it is what would be run first!
 
-The `__main__` part of the code is what sets up the initial parallel environment, like the number of MPI ranks, the master port and address for our Slurm job, etc. This is necessary to set up proper communication between tasks on Odo (especially when using multiple nodes). The rest of the `main` function prints out the GPUs being used so that we can analyze the comparisons between GPUs at the end of the testing. The last part that is run is a function called `setup`, which we defined at the very top of the "Functions" section above.
+The `__main__` part of the code is what sets up the initial parallel environment, like the number of MPI ranks, the master port and address for our Slurm job, etc. This is necessary to set up proper communication between tasks on Odo (especially when using multiple nodes). The rest of the `main` function prints out the GPUs being used so that we can analyze the comparisons between GPUs at the end of the testing. The last section that is run is setting up the process group in PyTorch to enable distributed training, calling the `train_model` function to train the model, and cleaning things up after training has finished.
 
 ```python
 if __name__ == "__main__":
@@ -537,6 +528,7 @@ if __name__ == "__main__":
 
     print(f'Total GPUs on the system: {n_gpus_total}')
 
+    # Set Up Parallel Environment
     from mpi4py import MPI
     comm = MPI.COMM_WORLD
     world_size = comm.Get_size()
@@ -551,7 +543,16 @@ if __name__ == "__main__":
     os.environ['MASTER_PORT'] = '29500'
     os.environ['NCCL_SOCKET_IFNAME'] = 'hsn0'
     print(f'Total GPUs being used this run: {world_size}')
-    setup(rank, world_size)
+
+    # Using Quantum Network? (will opt for Classical if not)
+    USE_QUANTUM = int(os.environ['USE_QUANTUM'])
+
+    # Initialize DDP group and train model
+    dist.init_process_group(backend='nccl', init_method='env://', world_size=world_size, rank=rank)
+    train_model(rank, world_size, quantum=USE_QUANTUM)
+
+    # Clean up ranks after training model
+    torch.distributed.destroy_process_group()
 ```
 
 > Fun fact: Python code living in the `__main__` code-block is run when the script is executed directly (e.g., `python3 script.py`). That section of the code is ignored when the script is used as an external module by a different python script.
@@ -559,6 +560,8 @@ if __name__ == "__main__":
 Thanks for taking the deep dive into the code. Now to tackle the challenge itself!
 
 ## Running the Challenge
+
+> Warning: This is not the challenge for the 2026 Winter Classic Invitational Student Cluster Competition (WCISCC)
 
 Now for the fun part, simulating quantum computing to train the model!
 
@@ -618,39 +621,56 @@ To do this challenge:
 Here's how the PennyLane and PyTorch environment was built:
 
 ```bash
-module load PrgEnv-gnu/8.6.0 
-module load rocm/6.1.3
+# Load modules
+module load PrgEnv-gnu/8.6.0
+module load rocm/6.4.1
 module load craype-accel-amd-gfx90a
-module load cmake/3.30.0
-module load gcc-native/14.2
-module load miniforge3/23.11.0
+module load miniforge3
 
-conda create -p /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qml-odo python=3.10 toml ninja -c conda-forge
-source activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qml-odo
+# Create and activate conda env
+conda create -p /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qml-odo python=3.12 -c conda-forge
+conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qml-odo
 
-# Install mpi4py
-MPICC="cc -shared" pip install --no-cache-dir --no-binary=mpi4py mpi4py
+# Install PennyLane Qiskit plugin and IQM Qiskit libraries
+pip install pennylane-qiskit iqm-client[qiskit]==33.0.5 --no-cache-dir
 
-# Install PyTorch
-pip install torch==2.4.1 torchvision==0.19.1 torchaudio==2.4.1 --index-url https://download.pytorch.org/whl/rocm6.1
+# Install building tool
+pip install ninja
 
-# Install PennyLane (w/ Lightning Kokkos plugin)
-# Clone the latest Lightning repository
-git clone -b v0.41.0 https://github.com/PennyLaneAI/pennylane-lightning.git
+# Modules needed to install Kokkos / PennyLane Lightning Kokkos Plugin
+module load PrgEnv-amd/8.6.0
+module load amd/6.4.1
+module load cmake
+
+cd /gpfs/wolf2/olcf/stf007/world-shared/9b8/temp_repos
+
+# Download and Build Kokkos
+wget https://github.com/kokkos/kokkos/archive/refs/tags/4.5.00.tar.gz
+tar -xvf 4.5.00.tar.gz
+cd kokkos-4.5.00/
+export KOKKOS_INSTALL_PATH=/gpfs/wolf2/olcf/stf007/world-shared/9b8/temp_repos/kokkos_install
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$KOKKOS_INSTALL_PATH -DCMAKE_CXX_STANDARD=20 -DCMAKE_CXX_COMPILER=hipcc -DBUILD_SHARED_LIBS:BOOL=ON -DBUILD_TESTING:BOOL=ON -DKokkos_ENABLE_SERIAL:BOOL=ON -DKokkos_ENABLE_HIP:BOOL=ON -DKokkos_ARCH_AMD_GFX90A:BOOL=ON -DKokkos_ENABLE_COMPLEX_ALIGN:BOOL=OFF -DKokkos_ENABLE_EXAMPLES:BOOL=OFF -DKokkos_ENABLE_TESTS:BOOL=OFF -DKokkos_ENABLE_LIBDL:BOOL=OFF
+cmake --build build && cmake --install build
+export CMAKE_PREFIX_PATH=$KOKKOS_INSTALL_PATH
+cd ..
+
+# Install PennyLane Lightning / PennyLane Lightning Kokkos
+git clone https://github.com/PennyLaneAI/pennylane-lightning.git
 cd pennylane-lightning
-sed -i -e 's/RelWithDebInfo/Release/g' setup.py # Force Release build for better performance
-
-# Install dependencies (will also install PennyLaneLightning 0.41.0 with Lightning_qubit)
-pip install pennylane==0.41.0 pennylane_lightning==0.41.0 --no-cache-dir 
-
-# Install (but skip the compilation step for) Lightning-Qubit
-# Necessary if swapping to a different branch, but already installed lightning_qubit for 0.41.0 release above
-#PL_BACKEND="lightning_qubit" python scripts/configure_pyproject_toml.py
-#SKIP_COMPILATION=True python3 setup.py bdist_wheel
-#pip install dist/*.whl
-
-# Install Lightning-Kokkos for AMD GPU 
+python -m pip install --group base
+pip install git+https://github.com/PennyLaneAI/pennylane.git@master
+PL_BACKEND="lightning_qubit" python scripts/configure_pyproject_toml.py
+CMAKE_ARGS="-DCMAKE_CXX_COMPILER=/opt/cray/pe/gcc-native/14/bin/g++" pip install .
+export MPI_EXTRA_LINKER_FLAGS="${CRAY_XPMEM_POST_LINK_OPTS} -lxpmem ${PE_MPICH_GTL_DIR_amd_gfx90a} ${PE_MPICH_GTL_LIBS_amd_gfx90a}"
+export CMAKE_ARGS="-DENABLE_MPI=ON -DCMAKE_CXX_COMPILER=hipcc"
+export CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_CXX_FLAGS='--gcc-install-dir=/opt/cray/pe/gcc/11.2.0/snos/lib/gcc/x86_64-suse-linux/11.2.0/'"
+export CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_CXX_COMPILER_CLANG_SCAN_DEPS:FILEPATH=/opt/rocm-6.4.1/lib/llvm/bin/clang-scan-deps"
+export CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_BUILD_TYPE=Release"
 PL_BACKEND="lightning_kokkos" python scripts/configure_pyproject_toml.py
-CMAKE_ARGS="-DKokkos_ENABLE_HIP=ON -DKokkos_ARCH_AMD_GFX90A=ON -DCMAKE_CXX_COMPILER=amdclang++ -DCMAKE_CXX_FLAGS='--gcc-install-dir=/opt/cray/pe/gcc/11.2.0/snos/lib/gcc/x86_64-suse-linux/11.2.0/' -DCATALYST_GIT_TAG='v0.11.0' " python3 setup.py bdist_wheel
-pip install dist/pennylane_lightning_kokkos-0.41.0-cp310-cp310-linux_x86_64.whl
+python -m pip install .
+cd ..
+
+# Install PyTorch and mpi4py
+pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/rocm6.4
+MPICC="cc -shared" pip install --no-cache-dir --no-binary=mpi4py mpi4py
 ```
