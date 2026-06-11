@@ -1,14 +1,10 @@
 #!/bin/bash
-#SBATCH -A TRN039
+#SBATCH -A TRN046
 #SBATCH -J qlsa
 #SBATCH -o "%x_%j".out
 #SBATCH -N 1
 #SBATCH -p batch
 #SBATCH -t 00:10:00
-
-# Only necessary if submitting this job script like: sbatch --export=NONE ... (recommended)
-# Do NOT include this line when submitting without --export=NONE
-unset SLURM_EXPORT_ENV
 
 # Set proxy settings so compute nodes can reach internet (required when using a real device)
 export all_proxy=socks://proxy.ccs.ornl.gov:3128/
@@ -18,7 +14,7 @@ export https_proxy=http://proxy.ccs.ornl.gov:3128/
 export no_proxy='localhost,127.0.0.0/8,*.ccs.ornl.gov'
 
 module load miniforge3
-source activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qlsa-solver 
+conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qlsa-solver 
 
 # HHL circuit generator
 srun -N1 -n1 -c1 python circuit_HHL.py -case sample-tridiag -casefile input_vars.yaml --savedata

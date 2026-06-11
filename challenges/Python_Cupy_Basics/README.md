@@ -49,17 +49,20 @@ The script unloads all of your previously activated conda environments, and no h
 Next, we will load the gnu compiler module (most Python packages assume GCC), relevant GPU module (necessary for CuPy):
 
 ```bash
-$ module load PrgEnv-gnu/8.6.0 
-$ module load rocm/5.7.1
-$ module load craype-accel-amd-gfx90a
-$ module load miniforge3 
+module load PrgEnv-gnu/8.7.0
+module load cpe/26.03
+module load miniforge3/23.11.0-0
+module load rocm/7.0.2
+module load craype-accel-amd-gfx90a
+
+# Because using a non-default CPE module (set this when building and running)
+export LD_LIBRARY_PATH=$CRAY_LD_LIBRARY_PATH:$LD_LIBRARY_PATH
 ```
 
 We loaded the "base" conda environment, but we need to activate a pre-built conda environment that has CuPy.
-Due to the specific nature of conda on Odo, we will be using `source activate` instead of `conda activate` to activate our new environment:
 
 ```bash
-$ source activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/cupy-odo
+$ conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/cupy-odo
 ```
 
 The path to the environment should now be displayed in "( )" at the beginning of your terminal lines, which indicates that you are currently using that specific conda environment.
@@ -285,7 +288,7 @@ To do this challenge:
 3. Submit a job:
 
     ```bash
-    $ sbatch --export=NONE submit_data.sbatch
+    $ sbatch submit_data.sbatch
     ```
 
 4. If you fixed the script, you should see the below output in `cupy_xfer-<JOB_ID>.out` after the job completes:
@@ -312,20 +315,21 @@ If you got the script to successfully run, then congratulations!
 Here's how the CuPy environment was built:
 
 ```bash
-$ module load PrgEnv-gnu/8.6.0 
-$ module load rocm/5.7.1
-$ module load craype-accel-amd-gfx90a
-$ module load miniforge3 
+module load PrgEnv-gnu/8.7.0
+module load cpe/26.03
+module load miniforge3/23.11.0-0
+module load rocm/7.0.2
+module load craype-accel-amd-gfx90a
 
-$ conda create -p /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/cupy-odo python=3.10 numpy=1.26.4 scipy -c conda-forge
+# Because using a non-default CPE module (set this when building and running)
+export LD_LIBRARY_PATH=$CRAY_LD_LIBRARY_PATH:$LD_LIBRARY_PATH
 
-$ source activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/cupy-odo
+conda create -p /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/cupy-odo python=3.12 numpy scipy -c conda-forge
+conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/cupy-odo
 
-$ export CUPY_INSTALL_USE_HIP=1
-$ export ROCM_HOME=${ROCM_PATH}
-$ export HCC_AMDGPU_TARGET=gfx90a
-
-$ CC=gcc CXX=g++ pip install --no-cache-dir --no-binary=cupy cupy==12.3.0
+export ROCM_HOME=${ROCM_PATH}
+export LD_PRELOAD=/opt/rocm-7.0.2/lib/librocsparse.so.1:${LD_PRELOAD} # due to bug detecting /opt/rocm on Odo
+pip install amd-cupy --extra-index-url https://pypi.amd.com/rocm-7.0.2/simple
 ```
 
 ## Additional Resources

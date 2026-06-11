@@ -243,7 +243,7 @@ $ module reset
 Next, we will load our miniforge module (analogous to an open-source minconda), and activate the appropriate conda environment for this exercise.
 ```
 $ module load miniforge3
-$ source activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qlsa-solver
+$ conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qlsa-solver
 ```
 The path to the environment should now be displayed in `"( )"` at the beginning of your terminal lines, which indicates that you are currently using that specific conda environment.
 If you check with `which python3`, you should see that you're properly in the new environment:
@@ -349,7 +349,7 @@ It is also advisable to test the code first to ensure the environment is set up 
 
 The general workflow is to (1) Load the appropriate Python `conda` environment, (2) Generate the circuit, (3) Run the QLSA solver with the circuit you just generated, and (4) Analyze your results
 
-These steps are included in your `sbatch submit_anvil_example.sh` file that you'll submit with `sbatch`:
+These steps are included in your `sbatch submit_odo_example.sh` file that you'll submit with `sbatch`:
 
 1. Load Python environment:
     * When targeting real quantum backends, you must go through a [proxy server for connecting outside OLCF](https://docs.olcf.ornl.gov/quantum/quantum_software/hybrid_hpc.html#batch-jobs) due to the Odo compute nodes being closed off from the internet by default. 
@@ -363,7 +363,7 @@ These steps are included in your `sbatch submit_anvil_example.sh` file that you'
       ```
       Activate the environment needed for circuit generation and solution:
       ```
-      $ source activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qlsa-solver 
+      $ conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qlsa-solver 
       ```
 2. Run QLSA circuit generator script: [`circuit_HHL.py`](circuit_HHL.py)
    Before we run the solver in step #3, we first have to generate the circuit that will be used.

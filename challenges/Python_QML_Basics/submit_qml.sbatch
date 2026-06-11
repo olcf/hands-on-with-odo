@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH -A TRN044
+#SBATCH -A TRN046
 #SBATCH -J qml_basics
 #SBATCH -o %x-%j.out
 #SBATCH -N 1
-#SBATCH -t 0:30:00
+#SBATCH -t 2:00:00
 #SBATCH -p batch
 #SBATCH -C nvme
 
@@ -11,10 +11,13 @@ cd $SLURM_SUBMIT_DIR
 date
 
 # Load modules
-module load PrgEnv-amd/8.6.0 
-module load amd/6.4.1
-module load craype-accel-amd-gfx90a
-module load miniforge3
+module load PrgEnv-amd/8.7.0
+module load cpe/26.03
+module load miniforge3/23.11.0-0
+module load amd/7.1.1 rocm/7.1.1
+
+# Because using a non-default CPE module
+export LD_LIBRARY_PATH=$CRAY_LD_LIBRARY_PATH:$LD_LIBRARY_PATH
 
 conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qml-odo
 
@@ -38,9 +41,10 @@ export no_proxy='localhost,127.0.0.0/8,*.ccs.ornl.gov'
 
 source keys.sh 
 
-export USE_QUANTUM=1
+export USE_QUANTUM=1 # set value to 0 to use classical network instead
 
 srun -n1 -c7 --gpus-per-task=1 --gpu-bind=closest python3 -W ignore -u qml.py
 
 # Don't run the below on multiple ranks, just -n1
 #srun -n1 -c7 --gpus-per-task=1 --gpu-bind=closest python3 -W ignore -u qml_eval.py
+#srun -n1 -c7 --gpus-per-task=1 --gpu-bind=closest python3 -W ignore -u qml_eval_real.py

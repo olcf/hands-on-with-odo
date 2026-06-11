@@ -74,10 +74,9 @@ $ module load miniforge3
 ```
 
 We loaded the "base" conda environment, but we need to activate a pre-built conda environment that has PyTorch.
-Due to the specific nature of conda on Odo, we will be using `source activate` instead of `conda activate` to activate our new environment:
 
 ```bash
-$ source activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/torch-odo
+$ conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/torch-odo
 ```
 
 The path to the environment should now be displayed in "( )" at the beginning of your terminal lines, which indicates that you are currently using that specific conda environment.
@@ -736,7 +735,7 @@ To do this challenge:
 2. Submit a job:
 
     ```bash
-    $ sbatch --export=NONE submit_cnn.sbatch
+    $ sbatch submit_cnn.sbatch
     ```
 
 3. Look at the statistics printed in your `pytorch_cnn-<JOB_ID>.out` file after the job completes to see if you were successful or not (i.e., see "Success!" or "Try again!").
@@ -788,7 +787,7 @@ $ module load miniforge3/23.11.0
 
 $ conda create -p /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/torch-odo python=3.10 imagemagick matplotlib -c conda-forge
 
-$ source activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/torch-odo
+$ conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/torch-odo
 
 $ pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/rocm6.1
 ```

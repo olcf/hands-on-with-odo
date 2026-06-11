@@ -64,11 +64,10 @@ Executing transaction: done
 #     $ conda deactivate
 ```
 
-Due to the specific nature of conda on Odo, we will be using `source activate` and `source deactivate` instead of `conda activate` and `conda deactivate`.
 Let's activate our new environment:
 
 ```bash
-$ source activate /ccsopen/proj/<YOUR_PROJECT_ID>/${USER}/conda_envs/odo/py39-odo
+$ conda activate /ccsopen/proj/<YOUR_PROJECT_ID>/${USER}/conda_envs/odo/py39-odo
 ```
 
 The path to the environment should now be displayed in "( )" at the beginning of your terminal lines, which indicate that you are currently using that specific conda environment.
@@ -184,7 +183,7 @@ Congratulations, you have just created your own Python environment and ran on on
 
     ```bash
     $ conda create -p /ccsopen/home/${USER}/.conda/envs/baseclone-odo --clone base
-    $ source activate /ccsopen/home/${USER}/.conda/envs/baseclone-odo
+    $ conda activate /ccsopen/home/${USER}/.conda/envs/baseclone-odo
     ```
 
 * Deleting an environment:
@@ -204,7 +203,7 @@ Congratulations, you have just created your own Python environment and ran on on
     To export your environment list:
     
     ```bash
-    $ source activate my_env
+    $ conda activate my_env
     $ conda env export > environment.yml
     ```
     
@@ -234,7 +233,7 @@ Congratulations, you have just created your own Python environment and ran on on
     
     This will create a `.condarc` file in your `$HOME` directory if you do not have one already, which will now contain this new envs_dirs location.
     This will now enable you to use the `--name env_name` flag when using conda commands for environments stored in that specific directory, instead of having to use the `-p /ccsopen/proj/<YOUR_PROJECT_ID>/${USER}/conda_envs/odo/env_name` flag and specifying the full path to the environment.
-    For example, you can do `source activate py39-odo` instead of `source activate /ccsopen/proj/<YOUR_PROJECT_ID>/${USER}/conda_envs/odo/py39-odo`.
+    For example, you can do `conda activate py39-odo` instead of `conda activate /ccsopen/proj/<YOUR_PROJECT_ID>/${USER}/conda_envs/odo/py39-odo`.
 
 &nbsp;
 
@@ -297,8 +296,8 @@ Congratulations, you have just created your own Python environment and ran on on
 * Activating/Deactivating an environment:
 
     ```bash
-    $ source activate my_env
-    $ source deactivate # deactivates the current environment
+    $ conda activate my_env
+    $ conda deactivate # deactivates the current environment
     ```
 
 * Installing/Uninstalling packages:
