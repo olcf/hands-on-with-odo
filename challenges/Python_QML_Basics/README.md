@@ -32,11 +32,13 @@ The script unloads all of your previously activated conda environments, and no h
 Next, we will load the modules necessary for our conda environment (various GPU modules and the conda module):
 
 ```bash
-$ module load PrgEnv-amd/8.6.0
-$ module load amd/6.4.1
-$ module load rocm/6.4.1
-$ module load craype-accel-amd-gfx90a
-$ module load miniforge3
+$ module load PrgEnv-amd/8.7.0
+$ module load cpe/26.03
+$ module load miniforge3/23.11.0-0
+$ module load amd/7.1.1 rocm/7.1.1
+
+# Because using a non-default CPE module
+$ export LD_LIBRARY_PATH=$CRAY_LD_LIBRARY_PATH:$LD_LIBRARY_PATH
 ```
 
 We loaded the "base" conda environment, but we need to activate a pre-built conda environment that has PennyLane and PyTorch:
@@ -129,6 +131,8 @@ https://en.wikipedia.org/wiki/Quantum_logic_gate
 Now, onto the actual tutorial!
 
 ## Looking at the code
+
+> Note: For more background on how this code works (and extra context of the quantum portion), please see our [`Quantum Transfer Learning Introduction`](./wciscc2026/wciscc2026_intro.pdf) presentation starting at slide 16. Additionally, a recording is available: <https://vimeo.com/1177365346> (starting at 22:30)
 
 Our `qml.py` code replaces the final layer of a pre-trained network with a special quantum computing layer. We will analyze the `qml.py` code and determine how it works before running. 
 
@@ -561,8 +565,6 @@ Thanks for taking the deep dive into the code. Now to tackle the challenge itsel
 
 ## Running the Challenge
 
-> Warning: This is not the challenge for the 2026 Winter Classic Invitational Student Cluster Competition (WCISCC)
-
 Now for the fun part, simulating quantum computing to train the model!
 
 To do this challenge:
@@ -592,7 +594,7 @@ To do this challenge:
 2. Submit a job:
 
     ```bash
-    $ sbatch --export=NONE submit_qml.sbatch
+    $ sbatch submit_qml.sbatch
     ```
 
 3. Look at the statistics printed in your `qml_basics-<JOB_ID>.out` file after the job completes to see the job stats and output. The line you should look for is this message at the bottom of the file:
@@ -602,9 +604,11 @@ To do this challenge:
     Best average loss: ... | Best average accuracy: ...
     ```
  
-4. By varying `-n` in step 1, compare and determine which number of GPUs (tasks) is optimal for the code. **Which configuration leads to the fastest training, but with the greatest "Best average accuracy" reported?**
+4. By varying `-n` in step 1, compare and determine which number of GPUs (tasks) is optimal for the code. **Which configuration leads to the fastest training, that still results in greater than 90% accuracy?**
 
-5. Optional bonus fun: Try changing `n_qubits` in `qml.py` to see what happens! (stay within 1-10 qubits).
+5. Optional bonus fun (run on a real quantum computer!!): Modify your batch script to run `qml_eval.py` and `qml_eval_real.py` instead. Both of these codes restart from a pre-trained checkpoint file that use the Quantum Network to validate the classification of 12 images for 5 epochs. `qml_eval.py` uses the `lightning.kokkos` simulator, where `qml_eval_real.py` targets a real quantum computer (IQM hardware)! See how running on a real quantum computer changes the results from epoch-to-epoch compared to just using the simulator.
+
+6. Optional: For more in-depth exercises, please see the [`Winter Classic 2026 Challenge`](./wciscc2026/2026WCISCC_instructions.pdf) from March 2026.
 
 ## Additional Resources
 
@@ -622,32 +626,26 @@ Here's how the PennyLane and PyTorch environment was built:
 
 ```bash
 # Load modules
-module load PrgEnv-gnu/8.6.0
-module load rocm/6.4.1
-module load craype-accel-amd-gfx90a
-module load miniforge3
+module load PrgEnv-amd/8.7.0
+module load cpe/26.03
+module load miniforge3/23.11.0-0
+module load amd/7.1.1 rocm/7.1.1
+module load cmake
+export LD_LIBRARY_PATH=$CRAY_LD_LIBRARY_PATH:$LD_LIBRARY_PATH
 
 # Create and activate conda env
 conda create -p /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qml-odo python=3.12 -c conda-forge
 conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qml-odo
 
-# Install PennyLane Qiskit plugin and IQM Qiskit libraries
-pip install pennylane-qiskit iqm-client[qiskit]==33.0.5 --no-cache-dir
-
 # Install building tool
 pip install ninja
-
-# Modules needed to install Kokkos / PennyLane Lightning Kokkos Plugin
-module load PrgEnv-amd/8.6.0
-module load amd/6.4.1
-module load cmake
 
 cd /gpfs/wolf2/olcf/stf007/world-shared/9b8/temp_repos
 
 # Download and Build Kokkos
-wget https://github.com/kokkos/kokkos/archive/refs/tags/4.5.00.tar.gz
-tar -xvf 4.5.00.tar.gz
-cd kokkos-4.5.00/
+wget https://github.com/kokkos/kokkos/archive/refs/tags/5.1.0.tar.gz
+tar -xvf 5.1.0.tar.gz
+cd kokkos-5.1.0/
 export KOKKOS_INSTALL_PATH=/gpfs/wolf2/olcf/stf007/world-shared/9b8/temp_repos/kokkos_install
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$KOKKOS_INSTALL_PATH -DCMAKE_CXX_STANDARD=20 -DCMAKE_CXX_COMPILER=hipcc -DBUILD_SHARED_LIBS:BOOL=ON -DBUILD_TESTING:BOOL=ON -DKokkos_ENABLE_SERIAL:BOOL=ON -DKokkos_ENABLE_HIP:BOOL=ON -DKokkos_ARCH_AMD_GFX90A:BOOL=ON -DKokkos_ENABLE_COMPLEX_ALIGN:BOOL=OFF -DKokkos_ENABLE_EXAMPLES:BOOL=OFF -DKokkos_ENABLE_TESTS:BOOL=OFF -DKokkos_ENABLE_LIBDL:BOOL=OFF
 cmake --build build && cmake --install build
@@ -657,20 +655,23 @@ cd ..
 # Install PennyLane Lightning / PennyLane Lightning Kokkos
 git clone https://github.com/PennyLaneAI/pennylane-lightning.git
 cd pennylane-lightning
+git checkout v0.45.0
 python -m pip install --group base
-pip install git+https://github.com/PennyLaneAI/pennylane.git@master
+pip install git+https://github.com/PennyLaneAI/pennylane.git@v0.45.0
 PL_BACKEND="lightning_qubit" python scripts/configure_pyproject_toml.py
-CMAKE_ARGS="-DCMAKE_CXX_COMPILER=/opt/cray/pe/gcc-native/14/bin/g++" pip install .
+CMAKE_ARGS="-DCMAKE_CXX_COMPILER=CC" pip install . -vv
 export MPI_EXTRA_LINKER_FLAGS="${CRAY_XPMEM_POST_LINK_OPTS} -lxpmem ${PE_MPICH_GTL_DIR_amd_gfx90a} ${PE_MPICH_GTL_LIBS_amd_gfx90a}"
 export CMAKE_ARGS="-DENABLE_MPI=ON -DCMAKE_CXX_COMPILER=hipcc"
-export CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_CXX_FLAGS='--gcc-install-dir=/opt/cray/pe/gcc/11.2.0/snos/lib/gcc/x86_64-suse-linux/11.2.0/'"
-export CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_CXX_COMPILER_CLANG_SCAN_DEPS:FILEPATH=/opt/rocm-6.4.1/lib/llvm/bin/clang-scan-deps"
-export CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_BUILD_TYPE=Release"
 PL_BACKEND="lightning_kokkos" python scripts/configure_pyproject_toml.py
-python -m pip install .
+python -m pip install . -vv
+
 cd ..
 
 # Install PyTorch and mpi4py
-pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/rocm6.4
+pip install torch==2.10.0 torchvision==0.25.0 torchaudio==2.10.0 --index-url https://download.pytorch.org/whl/rocm7.1
 MPICC="cc -shared" pip install --no-cache-dir --no-binary=mpi4py mpi4py
+
+# Install IQM Qiskit Libraries to be able to target IQM systems
+pip install pennylane-qiskit iqm-client[qiskit]==34.0.3 --no-cache-dir
+
 ```

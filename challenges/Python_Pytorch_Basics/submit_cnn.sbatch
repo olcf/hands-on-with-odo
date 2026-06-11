@@ -1,12 +1,10 @@
 #!/bin/bash
-#SBATCH -A TRN039
+#SBATCH -A TRN046
 #SBATCH -J pytorch_cnn
 #SBATCH -o %x-%j.out
 #SBATCH -t 1:00:00
 #SBATCH -p batch
 #SBATCH -N 1
-
-unset SLURM_EXPORT_ENV
 
 date
 
@@ -20,6 +18,6 @@ export MIOPEN_CUSTOM_CACHE_DIR=${MIOPEN_USER_DB_PATH}
 rm -rf ${MIOPEN_USER_DB_PATH}
 mkdir -p ${MIOPEN_USER_DB_PATH}
 
-source activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/torch-odo
+conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/torch-odo
 
 python3 -u cnn.py

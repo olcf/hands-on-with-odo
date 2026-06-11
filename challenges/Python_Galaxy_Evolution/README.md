@@ -54,10 +54,9 @@ $ module load miniforge3
 ```
 
 We are in a "base" conda environment, but we need to activate a pre-built conda environment that has `mpi4py` and `h5py`.
-Due to the specific nature of conda on Odo, we will be using `source activate` instead of `conda activate` to activate our environment:
 
 ```bash
-$ source activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/h5pympi-odo
+$ conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/h5pympi-odo
 ```
 
 The path to the environment should now be displayed in "( )" at the beginning of your terminal lines, which indicate that you are currently using that specific conda environment. 
@@ -88,7 +87,7 @@ Let's test that mpi4py is working properly first by executing the example Python
 To do so, we will be submitting a job to the batch queue with "submit_hello.sbatch":
 
 ```bash
-$ sbatch --export=NONE submit_hello.sbatch
+$ sbatch submit_hello.sbatch
 ```
 
 Once the batch job makes its way through the queue, it will run the "hello_mpi.py" script with 42 MPI tasks.
@@ -136,7 +135,7 @@ Each MPI task is going to assign their rank value to the "dset" array in Python,
 Time to execute "hdf5_parallel.py" by submitting "submit_h5py.sbatch" to the batch queue:
 
 ```bash
-$ sbatch --export=NONE submit_h5py.sbatch
+$ sbatch submit_h5py.sbatch
 ```
 
 Provided there are no errors, you should see "42 MPI ranks have finished writing!" in the `h5py.<JOB_ID>.out` output file, and there should be a new file called "output.h5" in your directory.
@@ -233,7 +232,7 @@ To do this challenge:
 3. Submit a job:
 
     ```bash
-    $ sbatch --export=NONE submit_galaxy.sbatch
+    $ sbatch submit_galaxy.sbatch
     ```
 
 4. If you fixed the script, you should see something similar to the output below in `galaxy-<JOB_ID>.out` after the job completes:
@@ -274,7 +273,7 @@ $ module load miniforge3
 
 $ conda create -p /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/h5pympi-odo python=3.10 numpy scipy matplotlib -c conda-forge
 
-$ source activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/h5pympi-odo
+$ conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/h5pympi-odo
 
 $ MPICC="cc -shared" pip install --no-cache-dir --no-binary=mpi4py mpi4py
 

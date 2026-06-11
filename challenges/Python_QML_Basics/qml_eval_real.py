@@ -75,12 +75,11 @@ def entangling_layer(nqubits):
     for i in range(1, nqubits - 1, 2):  # Loop over odd indices:  i=1,3,...N-3
         qml.CNOT(wires=[i, i + 1])
 
-#from iqm.qiskit_iqm import IQMProvider, transpile_to_IQM
-#provider = IQMProvider("https://resonance.iqm.tech/", quantum_computer="garnet") #API Token is set by "IQM_TOKEN" env var external to this script
-#backend = provider.get_backend()
-#dev = qml.device("qiskit.remote", wires=n_qubits,backend=backend,shots=1024)
+from iqm.qiskit_iqm import IQMProvider, transpile_to_IQM
+provider = IQMProvider("https://resonance.iqm.tech/", quantum_computer="garnet") #API Token is set by "IQM_TOKEN" env var external to this script
+backend = provider.get_backend()
+dev = qml.device("qiskit.remote", wires=n_qubits,backend=backend,shots=1024)
 
-dev = qml.device("lightning.kokkos", wires=n_qubits,shots=None)
 @qml.qnode(dev, interface="torch")
 def quantum_net(q_input_features, q_weights_flat):
     """
