@@ -36,7 +36,6 @@ $ module load PrgEnv-amd/8.7.0
 $ module load cpe/26.03
 $ module load miniforge3/23.11.0-0
 $ module load amd/7.1.1 rocm/7.1.1
-$ module load cmake
 
 # Because using a non-default CPE module
 $ export LD_LIBRARY_PATH=$CRAY_LD_LIBRARY_PATH:$LD_LIBRARY_PATH
@@ -607,7 +606,7 @@ To do this challenge:
  
 4. By varying `-n` in step 1, compare and determine which number of GPUs (tasks) is optimal for the code. **Which configuration leads to the fastest training, that still results in greater than 90% accuracy?**
 
-5. Optional bonus fun: Modify your batch script to run `qml_eval.py` and `qml_eval_real.py` instead. Both of these codes restart from a pre-trained checkpoint file that use the Quantum Network to validate the classification of 12 images for 5 epochs. `qml_eval.py` uses the `lightning.kokkos` simulator, where `qml_eval_real.py` targets a real quantum computer (IQM hardware)! See how running on a real quantum computer changes the results from epoch-to-epoch compared to just using the simulator.
+5. Optional bonus fun (run on a real quantum computer!!): Modify your batch script to run `qml_eval.py` and `qml_eval_real.py` instead. Both of these codes restart from a pre-trained checkpoint file that use the Quantum Network to validate the classification of 12 images for 5 epochs. `qml_eval.py` uses the `lightning.kokkos` simulator, where `qml_eval_real.py` targets a real quantum computer (IQM hardware)! See how running on a real quantum computer changes the results from epoch-to-epoch compared to just using the simulator.
 
 6. Optional: For more in-depth exercises, please see the [`Winter Classic 2026 Challenge`](./wciscc2026/2026WCISCC_instructions.pdf) from March 2026.
 
