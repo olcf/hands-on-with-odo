@@ -74,7 +74,7 @@ We will test our build by trying to write an HDF5 file in parallel using 42 MPI 
 First, change directories to your scratch area and copy over the python and batch scripts:
 
 ```bash
-$ cd /gpfs/wolf2/olcf/PROJECT_ID/scratch/${USER}/
+$ cd /gpfs/wolf2/olcf/project_id/scratch/${USER}/
 $ mkdir h5py_test
 $ cd h5py_test
 $ cp ~/hands-on-with-odo/challenges/Python_Galaxy_Evolution/hello_mpi.py .
@@ -174,7 +174,7 @@ The results of the simulation will look something like this:
 First, similar to before, change directories to your Lustre scratch area and copy over the python and batch scripts:
 
 ```bash
-$ cd /gpfs/wolf2/olcf/PROJECT_ID/scratch/${USER}/
+$ cd /gpfs/wolf2/olcf/project_id/scratch/${USER}/
 $ mkdir galaxy_challenge
 $ cd galaxy_challenge
 $ cp ~/hands-on-with-odo/challenges/Python_Galaxy_Evolution/galaxy.py .
@@ -189,9 +189,9 @@ You will be dealing with `galaxy.py`.
 The goal of `galaxy.py` is to simulate an infalling galaxy made up of "particles" (stars) and a "nucleus" (the compact central region) colliding with a bigger host galaxy.
 This would require a lot of code for it to be the most accurate ("many body" problems in physics are complicated); however, we made some physical assumptions to simplify the problem so that it is less complicated but still results in a roughly accurate galactic event.
 Even with simplifying things down, this script does not run quickly when not using MPI, as the amount of stars you want to simulate over a given time period quickly slows things down.
-We will be simulating 1000 stars and it takes about 2 minutes for the script to complete on Odo when only using 1 MPI task, while completing in about 20 seconds when using 8 MPI tasks.
+We will be simulating 1000 stars and it takes about 2 minutes for the script to complete on Odo when only using 1 MPI task, while completing in about 20 seconds when using 4 MPI tasks. (sometimes slower depending on filesystem behavior)
 
-In this challenge, you will be using 8 MPI tasks to help speed up the computations by splitting up the particles across your MPI tasks (each MPI task will only simulate a subset of the total number of particles).
+In this challenge, you will be using 4 MPI tasks to help speed up the computations by splitting up the particles across your MPI tasks (each MPI task will only simulate a subset of the total number of particles).
 The tasks will then write their subset of the data in parallel to an HDF5 file that will hold the entire final dataset.
 
 Luckily all the physics related stuff is done for you and all you have to worry about is changing a few h5py lines for the code to perform properly.
@@ -241,11 +241,7 @@ To do this challenge:
     MPI Rank 3 : Simulating my particles took 16.70100736618042 s
     MPI Rank 0 : Simulating my particles took 16.869715690612793 s
     MPI Rank 1 : Simulating my particles took 17.179004669189453 s
-    MPI Rank 6 : Simulating my particles took 17.414162635803223 s
-    MPI Rank 4 : Simulating my particles took 17.449076890945435 s
     MPI Rank 2 : Simulating my particles took 17.516165733337402 s
-    MPI Rank 5 : Simulating my particles took 18.588200092315674 s
-    MPI Rank 7 : Simulating my particles took 19.119014263153076 s
     Success!
     ```
 
@@ -259,6 +255,7 @@ $ python3 generate_animation.py
 
 This will take around a minute to complete, but will result in your own GIF.
 You can then transfer this GIF to your computer with Globus, `scp`, or `sftp` to keep as a "souvenir" from the challenge.
+After finishing the challenge, feel free to raise the value of `N_PART` in `galaxy.py` to create a dataset/GIF that has more particles! (you'll also need to increase the walltime of your batch script)
 
 ## Environment Information
 
@@ -271,7 +268,7 @@ $ module load PrgEnv-gnu/8.6.0
 $ module load cray-hdf5-parallel/1.12.2.11
 $ module load miniforge3
 
-$ conda create -p /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/h5pympi-odo python=3.10 numpy scipy matplotlib -c conda-forge
+$ conda create -p /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/h5pympi-odo python=3.12 numpy scipy matplotlib -c conda-forge
 
 $ conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/h5pympi-odo
 

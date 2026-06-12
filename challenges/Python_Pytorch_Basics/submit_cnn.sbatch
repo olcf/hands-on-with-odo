@@ -8,10 +8,14 @@
 
 date
 
-module load PrgEnv-gnu/8.6.0 
-module load rocm/6.1.3
+module load PrgEnv-gnu/8.7.0
+module load cpe/26.03
+module load miniforge3/23.11.0-0
+module load rocm/7.1.1
 module load craype-accel-amd-gfx90a
-module load miniforge3
+
+# Because using a non-default CPE
+export LD_LIBRARY_PATH=$CRAY_LD_LIBRARY_PATH:$LD_LIBRARY_PATH
 
 export MIOPEN_USER_DB_PATH="/tmp/my-miopen-cache"
 export MIOPEN_CUSTOM_CACHE_DIR=${MIOPEN_USER_DB_PATH}

@@ -14,4 +14,4 @@ module load miniforge3
 
 conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/h5pympi-odo
 
-srun -n8 python3 -u galaxy.py
+srun -n4 -c14 python3 -u galaxy.py

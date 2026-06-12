@@ -67,10 +67,15 @@ The script unloads all of your previously activated conda environments, and no h
 Next, we will load the gnu compiler module (most Python packages assume GCC) and the GPU module (necessary for using PyTorch on the GPU):
 
 ```bash
-$ module load PrgEnv-gnu/8.6.0
-$ module load rocm/6.1.3
+$ module load PrgEnv-gnu/8.7.0
+$ module load cpe/26.03
+$ module load miniforge3/23.11.0-0
+$ module load rocm/7.1.1
 $ module load craype-accel-amd-gfx90a
-$ module load miniforge3
+
+# Because using a non-default CPE
+$ export LD_LIBRARY_PATH=$CRAY_LD_LIBRARY_PATH:$LD_LIBRARY_PATH
+
 ```
 
 We loaded the "base" conda environment, but we need to activate a pre-built conda environment that has PyTorch.
@@ -680,7 +685,7 @@ You'll be submitting a job to run on a compute node to train your network.
 However, before asking for a compute node, change into your scratch directory and copy over the relevant files.
 
 ```bash
-$ cd /gpfs/wolf2/olcf/PROJECT_ID/scratch/${USER}/
+$ cd /gpfs/wolf2/olcf/project_id/scratch/${USER}/
 $ mkdir pytorch_test
 $ cd pytorch_test
 $ cp ~/hands-on-with-odo/challenges/Python_Pytorch_Basics/cnn.py ./cnn.py
@@ -710,13 +715,15 @@ $ display overall_results.png
 
 Opening the images is **not required**, as all the same statistics will be printed to your `.out` file.
 
-> Note: You can only open the images if you connected to Odo with window forwarding enabled and have X software installed (see above). Enabling window forwarding is usually done by including the `X` or `Y` SSH flags when connecting to the system. For example: `ssh -XY userid@odo.olcf.ornl.gov`. PuTTY users have an "X11 Forwarding" checkbox located in their SSH settings.
+> Note 1: You can only open the images if you connected to Odo with window forwarding enabled and have X software installed (see above). Enabling window forwarding is usually done by including the `X` or `Y` SSH flags when connecting to the system. For example: `ssh -XY userid@odo.olcf.ornl.gov`. PuTTY users have an "X11 Forwarding" checkbox located in their SSH settings.
+
+> Note 2: Alternatively, you can `mv` the images to your home directory and open them on the OLCF JupyterHub without needing to use window-forwarding or downloading them to your computer.
 
 After you complete the challenge, you can transfer these plots to your computer with Globus, `scp`, or `sftp` to keep as "souvenirs" from this challenge.
 
 To do this challenge:
 
-0. Make sure you copied over the scripts and are in your `/gpfs/wolf2/olcf/PROJECT_ID/scratch/${USER}/pytorch_test` directory (see beginning of this section).
+0. Make sure you copied over the scripts and are in your `/gpfs/wolf2/olcf/project_id/scratch/${USER}/pytorch_test` directory (see beginning of this section).
 
 1. Use your favorite editor to change `num_epochs` and `batch_size` to tune your network (lines 119 and 120, marked by "CHANGE-ME"). For example:
 
@@ -780,16 +787,20 @@ Top Speed:
 Here's how the PyTorch environment was built:
 
 ```bash
-$ module load PrgEnv-gnu/8.6.0 
-$ module load rocm/6.1.3
+$ module load PrgEnv-gnu/8.7.0
+$ module load cpe/26.03
+$ module load miniforge3/23.11.0-0
+$ module load rocm/7.1.1
 $ module load craype-accel-amd-gfx90a
-$ module load miniforge3/23.11.0
 
-$ conda create -p /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/torch-odo python=3.10 imagemagick matplotlib -c conda-forge
+# Because using a non-default CPE
+$ export LD_LIBRARY_PATH=$CRAY_LD_LIBRARY_PATH:$LD_LIBRARY_PATH
+
+$ conda create -p /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/torch-odo python=3.12 imagemagick matplotlib -c conda-forge
 
 $ conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/torch-odo
 
-$ pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/rocm6.1
+$ pip install torch==2.10.0 torchvision==0.25.0 torchaudio==2.10.0 --index-url https://download.pytorch.org/whl/rocm7.1
 ```
 
 ## 7. <a name="resources"></a>Additional Resources
