@@ -59,7 +59,9 @@ $ which python3
 
 Before we run the code, it is important to understand the process that the code will perform. We will start by analyzing quantum computing and figuring out why it is so readily optimized into ML applications.
 
-> Note: For a more complete introduction to quantum computing, please see our [`Quantum Primer`](../../presentations/Quantum_Primer_70125.pdf) presentation.
+> Note 1: For a more complete introduction to quantum computing, please see our [`Quantum Primer`](../../presentations/Quantum_Primer_70125.pdf) presentation.
+
+> Note 2: For more background on the quantum concepts specific to our code, please see our [`Quantum Transfer Learning Introduction`](./wciscc2026/wciscc2026_intro.pdf) presentation starting at slide 16. Additionally, a recording is available: <https://vimeo.com/1177365346> (starting at 22:30)
 
 ### Qubits
 
