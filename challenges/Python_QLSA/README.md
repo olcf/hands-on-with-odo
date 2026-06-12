@@ -259,7 +259,7 @@ $ which python3
 
 Before running the code, it is important to obtain your IQM token so that you can run the circuits on actual quantum devices.
 
-1. Log in to your IQM account at https://resonance.meetiqm.com
+1. Log in to your IQM account at https://resonance.iqm.tech
 
 2. In the "Your Account" menu (click on your initials in the top-right corner), click the circular arrows in the "API Token" section.
 
@@ -419,6 +419,41 @@ Below are the two objectives:
 * M. Gopalakrishnan Meena, K. C. Gottiparthi, J. G. Lietz, A. Georgiadou, and E. A. Coello Pérez, "Solving the Hele-Shaw flow using the Harrow-Hassidim-Lloyd algorithm on superconducting devices: A study of efficiency and challenges," [Physics of Fluids, 36 (10): 101705](https://doi.org/10.1063/5.0231929), (2024). ([preprint](http://arxiv.org/abs/2409.10857), [code](https://doi.org/10.5281/zenodo.13738192) - the current repo is adapted from this code)
 * [Qiskit - Getting started](https://qiskit.org/documentation/getting_started.html)
 * [Qiskit on IQM](https://iqm-finland.github.io/qiskit-on-iqm/user_guide.html)
+
+# 7. Environment Information
+
+> WARNING: This is NOT part of the challenge, but just context for the dependencies of this environment
+
+Here are the relevant packages:
+
+```
+PyYAML
+quantum_linear_solvers @ git+https://github.com/jw676/quantum_linear_solvers
+
+qiskit==1.2.4
+qiskit-aer==0.15.1
+qiskit-algorithms==0.3.1   
+qiskit-ibm-runtime==0.35.0
+qiskit-qasm3-import==0.5.1
+qiskit-iqm==17.3
+qiskit-ionq==0.5.13
+
+jupyterlab
+matplotlib
+python-dotenv
+numpy
+
+##########################
+# Known working versions #
+##########################
+
+# PyYAML==6.0.2
+# quantum_linear_solvers @ git+https://github.com/jw676/quantum_linear_solvers==0.1.0
+# jupyterlab==4.4.2
+# matplotlib==3.10.3
+# python-dotenv==1.1.0
+# numpy==2.2.5
+```
 
 # Cite this work
 
