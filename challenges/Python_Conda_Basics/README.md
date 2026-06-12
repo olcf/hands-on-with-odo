@@ -32,17 +32,17 @@ Typical best practice is to not install new things into the `base` environment, 
 So, next, we will create a new environment using the `conda create` command:
 
 ```bash
-$ conda create -p /ccsopen/proj/<YOUR_PROJECT_ID>/${USER}/conda_envs/odo/py39-odo python=3.9
+$ conda create -p /ccsopen/proj/project_id/${USER}/conda_envs/odo/py39-odo python=3.9
 ```
 
 The "`-p`" flag specifies the desired path and name of your new virtual environment.
-The directory structure is case sensitive, so be sure to insert "<YOUR_PROJECT_ID>" as lowercase.
+The directory structure is case sensitive, so be sure to insert your `project_id` as lowercase.
 The `${USER}` environment variable is a shortcut for accessing your username.
 Directories will be created if they do not exist already (provided you have write-access in that location).
 Instead, one can solely use the `--name <your_env_name>` flag which will automatically use your `$HOME` directory.
 
 >>  ---
-> NOTE: It is highly recommended to create new environments in the "Project Home" directory (on Odo, this is `/ccsopen/proj/<YOUR_PROJECT_ID>/<YOUR_USER_ID>`).
+> NOTE: It is highly recommended to create new environments in the "Project Home" directory (on Odo, this is `/ccsopen/proj/project_id/<YOUR_USER_ID>`).
 > This space avoids purges and allows for potential collaboration within your project.
 > It is also recommended, for convenience, that you use environment names that indicate the hostname, as virtual environments created on one system will not necessarily work on others.
 >>  ---
@@ -57,7 +57,7 @@ Executing transaction: done
 #
 # To activate this environment, use
 #
-#     $ conda activate /ccsopen/proj/<YOUR_PROJECT_ID>/<YOUR_USER_ID>/conda_envs/odo/py39-odo
+#     $ conda activate /ccsopen/proj/project_id/<YOUR_USER_ID>/conda_envs/odo/py39-odo
 #
 # To deactivate an active environment, use
 #
@@ -67,7 +67,7 @@ Executing transaction: done
 Let's activate our new environment:
 
 ```bash
-$ conda activate /ccsopen/proj/<YOUR_PROJECT_ID>/${USER}/conda_envs/odo/py39-odo
+$ conda activate /ccsopen/proj/project_id/${USER}/conda_envs/odo/py39-odo
 ```
 
 The path to the environment should now be displayed in "( )" at the beginning of your terminal lines, which indicate that you are currently using that specific conda environment.
@@ -78,7 +78,7 @@ $ conda env list
 
 # conda environments:
 #
-                      *  /ccsopen/proj/<YOUR_PROJECT_ID>/<YOUR_USER_ID>/conda_envs/odo/py39-odo
+                      *  /ccsopen/proj/project_id/<YOUR_USER_ID>/conda_envs/odo/py39-odo
 base                     /autofs/nccs-svm1_sw/odo/miniforge3/23.11.0
 ```
 
@@ -228,12 +228,12 @@ Congratulations, you have just created your own Python environment and ran on on
     To do so, you must execute:
 
     ```bash
-    $ conda config --append envs_dirs /ccsopen/proj/<YOUR_PROJECT_ID>/${USER}/conda_envs/odo
+    $ conda config --append envs_dirs /ccsopen/proj/project_id/${USER}/conda_envs/odo
     ```
     
     This will create a `.condarc` file in your `$HOME` directory if you do not have one already, which will now contain this new envs_dirs location.
-    This will now enable you to use the `--name env_name` flag when using conda commands for environments stored in that specific directory, instead of having to use the `-p /ccsopen/proj/<YOUR_PROJECT_ID>/${USER}/conda_envs/odo/env_name` flag and specifying the full path to the environment.
-    For example, you can do `conda activate py39-odo` instead of `conda activate /ccsopen/proj/<YOUR_PROJECT_ID>/${USER}/conda_envs/odo/py39-odo`.
+    This will now enable you to use the `--name env_name` flag when using conda commands for environments stored in that specific directory, instead of having to use the `-p /ccsopen/proj/project_id/${USER}/conda_envs/odo/env_name` flag and specifying the full path to the environment.
+    For example, you can do `conda activate py39-odo` instead of `conda activate /ccsopen/proj/project_id/${USER}/conda_envs/odo/py39-odo`.
 
 &nbsp;
 

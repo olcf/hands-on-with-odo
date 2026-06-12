@@ -569,7 +569,7 @@ Now for the fun part, simulating quantum computing to train the model!
 
 To do this challenge:
 
-0. Make sure you copy over the scripts and are in your `/gpfs/wolf2/olcf/PROJECT_ID/scratch/${USER}/qml_test` directory:
+0. Make sure you copy over the scripts and are in your `/gpfs/wolf2/olcf/project_id/scratch/${USER}/qml_test` directory:
 
     ```bash
     $ cd /gpfs/wolf2/olcf/project_id/scratch/${USER}/
