@@ -243,14 +243,14 @@ $ module reset
 Next, we will load our miniforge module (analogous to an open-source minconda), and activate the appropriate conda environment for this exercise.
 ```
 $ module load miniforge3
-$ conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qlsa-solver
+$ conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qlsa-solver-latest
 ```
 The path to the environment should now be displayed in `"( )"` at the beginning of your terminal lines, which indicates that you are currently using that specific conda environment.
 If you check with `which python3`, you should see that you're properly in the new environment:
 
 ```
 $ which python3
-/gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qlsa-solver/bin/python3
+/gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qlsa-solver-latest/bin/python3
 ```
 
 ## 4. <a name="overview"></a>Overview of How to Run
@@ -363,7 +363,7 @@ These steps are included in your `sbatch submit_odo_example.sh` file that you'll
       ```
       Activate the environment needed for circuit generation and solution:
       ```
-      $ conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qlsa-solver 
+      $ conda activate /gpfs/wolf2/olcf/stf007/world-shared/9b8/crashcourse_envs/qlsa-solver-latest
       ```
 2. Run QLSA circuit generator script: [`circuit_HHL.py`](circuit_HHL.py)
    Before we run the solver in step #3, we first have to generate the circuit that will be used.

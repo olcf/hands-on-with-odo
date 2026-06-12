@@ -64,7 +64,7 @@ def qc_backend(backend_type, backend_method, args):
     elif backend_type=='real-iqm':
         # save your IQM account for future loading
         API_KEY = os.getenv('IQM_API_KEY') # ${IQM_TOKEN} can't be set when using `token` parameter below
-        server_url = f"https://cocos.resonance.meetiqm.com/{backend_method}"
+        server_url = f"https://resonance.iqm.tech/"
         if "fake" in backend_method: # "facade" backends only work for Adonis (switching to "fake" backends)
             if backend_method=="fake_garnet":
                 from iqm.qiskit_iqm import IQMFakeGarnet
@@ -72,7 +72,7 @@ def qc_backend(backend_type, backend_method, args):
             else:
                 raise Exception('Unknown fake backend.')
         else:
-            backend = IQMProvider(server_url, token=API_KEY).get_backend()
+            backend = IQMProvider(server_url, quantum_computer=backend_method, token=API_KEY).get_backend()
     elif backend_type=='real-ionq':
         # save your IonQ account for future loading
         API_KEY = os.getenv('IONQ_API_KEY')
