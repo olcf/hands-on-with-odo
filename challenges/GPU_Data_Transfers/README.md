@@ -32,7 +32,7 @@ Before getting started, you'll need to make sure you're in the `GPU_Data_Transfe
 $ cd ~/hands-on-with-odo/challenges/GPU_Data_Transfers/
 ```
 
-There are two places in the `vector_addition.cpp` code (identified with the word `TODO`) where missing arguments will need to be added to the `hipMemcpy` API calls. Find these two places and add in the missing arguments by looking up the `hipMemcpy` API call to know which arguments to add. Use [this link](https://rocm.docs.amd.com/projects/HIP/en/docs-develop/reference/hip_runtime_api/modules/memory_management.html#_CPPv49hipMemcpyPvPKv6size_t13hipMemcpyKind) to the AMD Documentation on the `hipMemcpy` routine to learn how to use the routine.
+There are two places in the `vector_addition.cpp` code (identified with the word `TODO`) where missing arguments will need to be added to the `hipMemcpy` API calls. Find these two places and add in the missing arguments by looking up the `hipMemcpy` API call to know which arguments to add. Use [this link](https://rocm.docs.amd.com/projects/HIP/en/latest/reference/hip_runtime_api/modules/memory_management.html#_CPPv49hipMemcpyPvPKv6size_t13hipMemcpyKind) to the AMD Documentation on the `hipMemcpy` routine to learn how to use the routine.
 
 > NOTE: You will not need to edit any files other than `vector_addition.cpp`.
 

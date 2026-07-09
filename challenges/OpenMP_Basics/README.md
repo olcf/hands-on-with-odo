@@ -107,7 +107,7 @@ Now we're ready to run! To do so, issue the command:
 sbatch submit.sbatch
 ```
 
-You can view the status of your job with the `sacct -u USERNAME` command. While you're waiting for the job to finish, take a look at the `submit.sbatch` script you used to submit your job. The environment variable `OMP_NUM_THREADS` can be used to set the number of OpenMP threads to be spawned in the parallel region. It's currently set to 4, but you can change it and re-run to see the results from different numbers of OpenMP threads.
+You can view the status of your job with the `squeue -u USERNAME` command. While you're waiting for the job to finish, take a look at the `submit.sbatch` script you used to submit your job. The environment variable `OMP_NUM_THREADS` can be used to set the number of OpenMP threads to be spawned in the parallel region. It's currently set to 4, but you can change it and re-run to see the results from different numbers of OpenMP threads. NOTE: If your job runs very quickly, you may not see it with `squeue`. Instead, you can run `sacct -u USERNAME` to see a list of all of your recent jobs.
 
 Once your job is complete, you should have a file called `hello_test-JOBID.out`, where `JOBID` is the unique ID assigned to your job. This file will include the date, the output from the program, and some basic information about the job itself (below the dashed horizontal line). The program output should look something like this:
 
@@ -270,7 +270,8 @@ Now, we're ready to run! To do so, issue the command:
 sbatch submit.sbatch
 ```
 
-You can view the status of your job with the `sacct -u USERNAME` command. While you're waiting for the job to finish, take a look at the `submit.sbatch` script you used to submit your job. The environment variable `OMP_NUM_THREADS` can be used to set the number of OpenMP threads that are spawned in the parallel region. It's originally set to 4, but you can change it and re-run to see the results from different numbers of OpenMP threads.
+You can view the status of your job with the `squeue -u USERNAME` command. While you're waiting for the job to finish, take a look at the `submit.sbatch` script you used to submit your job. The environment variable `OMP_NUM_THREADS` can be used to set the number of OpenMP threads that are spawned in the parallel region. It's originally set to 4, but you can change it and re-run to see the results from different numbers of OpenMP threads. NOTE: If your job runs very quickly, you may not see it with `squeue`. Instead, you can run `sacct -u USERNAME` to see a list of all of your recent jobs.
+
 
 Once your job is complete, you should have a file called `vec_add-JOBID.out`, where `JOBID` is the unique ID assigned to your job. This file will include the date, the output from the program, and some basic information about the job itself (below the dashed horizontal line). The program output should look something like this:
 

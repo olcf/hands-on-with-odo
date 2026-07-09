@@ -26,7 +26,7 @@ int main(int argc, char ** argv)
 	
   if (rank == 0) {
     strcpy(message, "hello!");
-    MPI_Send(&message, 6, MPI_CHAR, 1, ntag, MPI_COMM_WORLD);
+    MPI_Send(&message, 7, MPI_CHAR, 1, ntag, MPI_COMM_WORLD);
   }
 
   /*----------------------------------------------*/
@@ -37,7 +37,7 @@ int main(int argc, char ** argv)
   /*----------------------------------------------*/
 
   if (rank == 1 ) {
-    MPI_Recv(&message, 6, MPI_CHAR, 0, ntag, MPI_COMM_WORLD, &status);
+    MPI_Recv(&message, 7, MPI_CHAR, 0, ntag, MPI_COMM_WORLD, &status);
     printf("Process %d : %s\n", rank, message);
   }
 
