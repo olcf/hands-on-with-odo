@@ -273,7 +273,7 @@ Here is the code ptp.c, where process 0 will send the message "hello!" to proces
 Your challenge is to use the arguments in the send function and the function definitions above to fill in the missing arguments. 
 
 Some of the questions to help you:
-Why does the MPI_Send function say that the message has 6 elements?
+Why does the MPI_Send function say that the message has 7 elements?
 What datatype is "hello!" ? 
 Where is the message coming from? 
 
@@ -306,7 +306,7 @@ int main(int argc, char ** argv)
 
   if (rank == 0) {
     strcpy(message, "hello!");
-    MPI_Send(&message, 6, MPI_CHAR, 1, ntag, MPI_COMM_WORLD);
+    MPI_Send(&message, 7, MPI_CHAR, 1, ntag, MPI_COMM_WORLD);
   }
 
   /*----------------------------------------------*/
