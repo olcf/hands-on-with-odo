@@ -163,7 +163,7 @@ Which is all fine and good. But what if you wanted it to use a cleaner, more rob
 
 > Write two Python functions to estimate pi—one using Monte Carlo simulation, and one using a Taylor series expansion. Compare their performance.
 
-## Request Explanations Alongside Code
+## 8. Request Explanations Alongside Code
 
 **Tip:** Ask for brief explanations of what each block of code is doing. <br />
 
@@ -190,7 +190,7 @@ Creativity is key! You can make the customization whatever input you would like.
 <br />
 
 Once you have finished, put the following into a text tile:
-* Your original prompt
+* Your original prompt. Put in all of the prompts you originally used (since you likely used multiple prompts to get to your fractal, you need to copy ALL of them). 
 * The code and image it generated
 * A short, 2-3 sentence reflection on this workshop. What technique helped the most? What technique didn't help? What would you change?  
-
+Save all of this within the Prompt Engineering folder. 
