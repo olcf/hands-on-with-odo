@@ -766,10 +766,12 @@ Top Accuracy:
 | 1.    | Fernando H.      | Summer HPC-CC 2025            | 77.32%   | 203s    |
 | 2.    | Christian G.     | Summer HPC-CC 2025            | 67.15%   | 997s    |
 | 3.    | Celeste L.       | Summer HPC-CC 2025            | 66.30%   | 724s    |
-| 4.    | Sophie V.        | Summer HPC-CC 2025            | 65.32%   | 912s    |
-| 5.    | Zack K.          | Summer HPC-CC 2025            | 64.62%   | 1034s   |
-| 6.    | Eric M.          | Summer HPC-CC 2025            | 62.17%   | 3369s   |
-| 7.    | Malachi K.       | Summer HPC-CC 2025            | 61.77%   | 1791s   |
+| 4.    | Srilakshmi S.    | Summer HPC-CC 2026            | 65.97%   | 910s    |
+| 5.    | Chance L.        | Summer HPC-CC 2026            | 65.49%   | 1776    |
+| 6.    | Sophie V.        | Summer HPC-CC 2025            | 65.32%   | 912s    |
+| 7.    | Zack K.          | Summer HPC-CC 2025            | 64.62%   | 1034s   |
+| 8.    | Eric M.          | Summer HPC-CC 2025            | 62.17%   | 3369s   |
+| 9.    | Malachi K.       | Summer HPC-CC 2025            | 61.77%   | 1791s   |
 
 
 Top Speed:
